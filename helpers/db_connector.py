@@ -36,7 +36,7 @@ def connection(query: str,
         if not result[0]:  # If /alert was never called
             name = get_chat_name(update)
 
-            c.execute(f"INSERT INTO CHAT_SETTINGS VALUES({chat_id},'{name}','❌');")  # First time use
+            c.execute(f"INSERT INTO CHAT_SETTINGS VALUES({chat_id},'{name}','❌',1);")  # First time use
             conn.commit()
 
     c.execute(query)

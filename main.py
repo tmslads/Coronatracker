@@ -2,7 +2,6 @@ import logging
 import pickle
 import pprint
 
-from telegram import Update
 from telegram.ext import Updater, CommandHandler, PicklePersistence, CallbackQueryHandler, CallbackContext
 
 import commands
@@ -16,7 +15,7 @@ def data_view() -> None:
         pprint.PrettyPrinter(indent=2).pprint(pickle.load(f1))
 
 
-def alert_ppl(_: Update, context: CallbackContext) -> None:
+def alert_ppl(context: CallbackContext) -> None:
     ids = []
     for _id in ids:
         try:

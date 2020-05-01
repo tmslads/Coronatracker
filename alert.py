@@ -1,4 +1,5 @@
 import logging
+from datetime import datetime
 
 from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton
 from telegram.ext import CallbackContext
@@ -27,20 +28,37 @@ def new_cases_alert(context: CallbackContext) -> None:
     if 'latest_breaking_url' not in context.bot_data:
         context.bot_data['latest_breaking_url'] = None
 
+    if 'sent_alert_today' not in context.bot_data:
+        context.bot_data['sent_alert_today'] = datetime.today()
+
     breaking_url = GulfNews().breaking()
 
-    if breaking_url is not None:
-        if breaking_url != context.bot_data['latest_breaking_url']:  # New coronavirus cases/deaths, etc
+    if breaking_url is None:
+        return
 
-            ids_query = f"SELECT CHAT_ID, CHAT_NAME FROM CHAT_SETTINGS WHERE ALERTS='✅';"
-            ids = connection(ids_query, fetchall=True)
+    if breaking_url != context.bot_data['latest_breaking_url']:  # New coronavirus cases/deaths, etc
 
-            for chat_id, chat_name in ids:
-                context.bot.send_message(chat_id=chat_id, text=f"UPDATE:\n\n{breaking_url}")
+        query = f"SELECT CHAT_ID, CHAT_NAME, MSG_ID FROM CHAT_SETTINGS WHERE ALERTS='✅';"
+        result = connection(query, fetchall=True)
+        today = datetime.today()
+        alert_today = context.bot_data['sent_alert_today']
+
+        for chat_id, chat_name, msg_id in result:
+
+            if today.month > alert_today.month or today.day > alert_today.day:  # Check if new day has passed
+                msg = context.bot.send_message(chat_id=chat_id, text=f"UPDATE:\n\n{breaking_url}")
                 logging.info(f"\nThe breaking news was just sent to: {chat_name}.\n\n")
 
-            context.bot_data['latest_breaking_url'] = breaking_url  # Save the latest breaking news url
-            context.dispatcher.persistence.flush()  # Gotta do this to force save sigh
+                msg_query = f"UPDATE CHAT_SETTINGS SET MSG_ID={msg.message_id} WHERE CHAT_ID={chat_id};"
+                connection(msg_query, table_update=True)  # Add/Update message id to db so we can update later
+
+            else:
+                context.bot.edit_message_text(chat_id=chat_id, message_id=msg_id, text=f"UPDATE:\n\n{breaking_url}")
+                logging.info(f"\nThe breaking news msg was updated for: {chat_name}.\n\n")
+
+        context.bot_data['latest_breaking_url'] = breaking_url  # Save the latest breaking news url
+        context.bot_data['sent_alert_today'] = today
+        context.dispatcher.persistence.flush()  # Gotta do this to force save sigh
 
 
 def opt_in_out(update: Update, context: CallbackContext) -> None:
