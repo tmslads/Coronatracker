@@ -33,7 +33,7 @@ class WorldMeter(object):
                     elif index == 7:
                         new['new_deaths'] = str(string).replace('+', '🔺')
                     elif index == 11:
-                        new['new_recoveries'] = str(string).replace('+', 'ꕔ')
+                        new['new_recoveries'] = str(string).replace('+', '🔺')
 
                 else:
                     totals.append(str(string))
