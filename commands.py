@@ -44,13 +44,15 @@ def uae(update: Update, context: CallbackContext) -> None:
     msg = f"Here's a breakdown of UAE coronavirus cases:\n\n" \
           f"Total cases: {totals[0]}  {new['new_cases']}\n" \
           f"Total deaths: {totals[1]}  {new['new_deaths']}\n" \
-          f"Total recovered: {totals[2]}\n" \
+          f"Total recovered: {totals[2]}  {new['new_recoveries']}\n" \
           f"Active cases: {totals[3]}\n" \
           f"Critical cases: {totals[4]}\n" \
           f"Total cases/1M population: {totals[5]}\n" \
           f"Deaths/1M population: {totals[6]}\n" \
           f"Total tests: {totals[7]}\n" \
           f"Tests/1M population: {totals[8]}\n\n" \
+          f"There's roughly 1 case in every {totals[9]} people, 1 death in every {totals[10]} " \
+          f"people and 1 test done in every {totals[11]} people.\n\n" \
           f"_Last updated on {datetime.utcnow().strftime('%B %d, %Y at %H:%M:%S')} UTC_"
 
     context.bot.send_message(chat_id=chat_id, text=msg, parse_mode="MarkdownV2")
