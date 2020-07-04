@@ -51,8 +51,8 @@ def uae(update: Update, context: CallbackContext) -> None:
           f"Deaths/1M population: {totals[6]}\n" \
           f"Total tests: {totals[7]}\n" \
           f"Tests/1M population: {totals[8]}\n\n" \
-          f"There's roughly 1 case in every {totals[9]} people, 1 death in every {totals[10]} " \
-          f"people and 1 test done in every {totals[11]} people.\n\n" \
+          f"There's roughly 1 case in every {totals[10]} people, 1 death in every {totals[11]} " \
+          f"people and 1 test done in every {totals[12]} people\.\n\n" \
           f"_Last updated on {datetime.utcnow().strftime('%B %d, %Y at %H:%M:%S')} UTC_"
 
     context.bot.send_message(chat_id=chat_id, text=msg, parse_mode="MarkdownV2")
