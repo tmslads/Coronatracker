@@ -12,18 +12,15 @@ class GulfNews(object):
         self.soup = bs(get.content, features='html.parser')
 
     def breaking(self):
-        latest_breaking = self.soup.find_all(class_='card card-featured')
+        latest_breaking = self.soup.find_all(class_='card-title')
         for breaking in latest_breaking:
-            title = breaking.a.get_text()
-            print(title)
-            pattern = re.compile("\A(UAE|Coronavirus: UAE|COVID(-|\s)*19: UAE) (announces|reports) (\d+) "
-                                 "(new (coronavirus*) cases)*.*")
-            if re.search(pattern=pattern, string=title):
+            title = breaking.a.get_text().strip().replace('  ', ' ')
+            pattern1 = re.compile("\A(UAE|Coronavirus: UAE|COVID(-|\s)*19: UAE) (announces|reports) (\d+) "
+                                  "(new (coronavirus*) cases)*.*")
+            pattern2 = re.compile("(\d+) new cases of COVID-19 (UAE)*")
+            if re.search(pattern=pattern1, string=title) or re.search(pattern=pattern2, string=title):
                 breaking_link = breaking.a['href']
                 return f"{GULFNEWS_URL + breaking_link}"  # Send link to breaking article
-
-            else:
-                return
 
 
 # FOR TRAINING THE REGEX:

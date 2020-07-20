@@ -2,10 +2,11 @@ import logging
 import pickle
 import pprint
 
-from telegram.ext import Updater, CommandHandler, PicklePersistence, CallbackQueryHandler, CallbackContext
+from telegram.ext import (Updater, CommandHandler, PicklePersistence, CallbackQueryHandler, CallbackContext,
+                          MessageHandler, Filters, ConversationHandler)
 
-import commands
-from alert import new_cases_alert, opt_in_out, update_alert
+from bot_funcs.commands import start, world, uae, helper, ask_feedback, receive_feedback, cancel
+from bot_funcs.alert import new_cases_alert, opt_in_out, update_alert
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(lineno)d - %(message)s', level=logging.INFO)
 
@@ -13,6 +14,10 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(lineno)d 
 def data_view() -> None:
     with open('files/user_data', 'rb') as f1:
         pprint.PrettyPrinter(indent=2).pprint(pickle.load(f1))
+
+
+def msgs(update, _):
+    print(f"{update.effective_user.full_name} said {update.message.text}")
 
 
 def alert_ppl(context: CallbackContext) -> None:
@@ -41,12 +46,21 @@ if __name__ == "__main__":
     updater = Updater(token=token, use_context=True, persistence=pp)
     dp = updater.dispatcher
 
-    dp.add_handler(CommandHandler(command='start', callback=commands.start))
-    dp.add_handler(CommandHandler(command='help', callback=commands.helper))
-    dp.add_handler(CommandHandler(command='world', callback=commands.world))
-    dp.add_handler(CommandHandler(command='UAE', callback=commands.uae))
+    for k, v in {'start': start, 'help': helper, 'world': world, 'uae': uae}.items():
+        dp.add_handler(CommandHandler(command=k, callback=v))
+
     dp.add_handler(CommandHandler(command='alerts', callback=opt_in_out))
 
+    # For feedback-
+    dp.add_handler(ConversationHandler(
+        entry_points=[CommandHandler(command='feedback', callback=ask_feedback)],
+        states={1: [MessageHandler(filters=Filters.text & ~ Filters.command, callback=receive_feedback)]},
+        fallbacks=[CommandHandler(command='cancel', callback=cancel)]))
+
+    # Random text to bot-
+    dp.add_handler(MessageHandler(filters=Filters.text, callback=msgs))
+
+    # For toggling alerts-
     dp.add_handler(CallbackQueryHandler(callback=update_alert, pattern="toggle"))
 
     updater.job_queue.run_repeating(callback=new_cases_alert, interval=90, first=1)

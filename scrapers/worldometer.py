@@ -21,7 +21,7 @@ class WorldMeter(object):
 
         info = self.soup.find_all(href="country/united-arab-emirates/")[0]  # [0] Since get 2 elements for some reason
         siblings = info.parent.next_siblings  # Go up the tree and get its siblings
-        new = {'new_cases': '', 'new_deaths': ''}
+        new = {'new_cases': '', 'new_deaths': '', 'new_recoveries': ''}
         totals = []
 
         for index, sibling in enumerate(siblings):
@@ -30,8 +30,11 @@ class WorldMeter(object):
                 if '+' in string:
                     if index == 3:
                         new['new_cases'] = str(string).replace('+', '🔺')  # Convert to string to save memory!
-                    else:
+                    elif index == 7:
                         new['new_deaths'] = str(string).replace('+', '🔺')
+                    elif index == 11:
+                        new['new_recoveries'] = str(string).replace('+', '🔺')
+
                 else:
                     totals.append(str(string))
 
