@@ -1,11 +1,11 @@
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 from matplotlib import patheffects
 from matplotlib.dates import AutoDateLocator, ConciseDateFormatter, date2num
 from matplotlib.font_manager import FontProperties
 from matplotlib.ticker import EngFormatter
 
-from basegraph import BaseGraph
-from load_data import DataHandler
+from ..graph_objects.basegraph import BaseGraph
+# from ..load_data import DataHandler
 
 
 class LineGraph(BaseGraph):
@@ -15,9 +15,7 @@ class LineGraph(BaseGraph):
         super().__init__()
         self.x = x
         self.y = y
-
-        if logscale:
-            self.logscale = logscale
+        self.logscale = logscale
 
     def plot(self, line_color: str, line_width: int, **kwargs):
         self.ax.plot(self.x, self.y, color=line_color, linewidth=line_width, **kwargs)
@@ -34,7 +32,7 @@ class LineGraph(BaseGraph):
         formatter = ConciseDateFormatter(locator)
 
         # Convert cases numbers to human readable form- Eg: 7000 -> 7k
-        human_format = EngFormatter(unit='', sep="")
+        human_format = EngFormatter(sep="")
 
         super().set_locator_formatter(x_locator=locator, x_formatter=formatter, y_formatter=human_format)
 
@@ -44,20 +42,18 @@ class LineGraph(BaseGraph):
                                       textcoords='offset points', ha='center',
                                       arrowprops={'facecolor': '#02D4F5', 'headwidth': 12, 'edgecolor': '#13292B'},
                                       annotation_clip=False)
-        print(annotation.xy)
 
         case_no = str(int(self.y[-1])).__len__()
         if case_no >= 7:
-            offset = 16
+            offset = 19
         elif 5 <= case_no:
-            offset = 13
+            offset = 16
         else:
-            offset = 9
+            offset = 11
 
         self.ax.text(x=annotation.xy[0] + offset, y=annotation.xy[-1], s=format(int(self.y[-1]), ',d'), ha='center',
                      fontfamily='Product Sans', color='#FFFFFF', fontsize=14, fontweight='bold', va='center',
-                     path_effects=[patheffects.SimpleLineShadow(shadow_color='#331C7C', alpha=0.8),
-                                   patheffects.Normal()])
+                     path_effects=[patheffects.withSimplePatchShadow(shadow_rgbFace='#2C2C2C', alpha=0.2)])
 
     def tick_config(self):
         # Change tick properties such as tick markers, color, transparency, etc-
@@ -68,9 +64,11 @@ class LineGraph(BaseGraph):
 
         for xtick in self.ax.xaxis.get_major_ticks():
             xtick.label.set_fontproperties(self.fp)
+            xtick.label.set_path_effects([patheffects.withSimplePatchShadow(shadow_rgbFace='#2C2C2C', alpha=0.4)])
 
         for ytick in self.ax.yaxis.get_major_ticks():
             ytick.label.set_fontproperties(self.fp)
+            ytick.label.set_path_effects([patheffects.withSimplePatchShadow(shadow_rgbFace='#2C2C2C', alpha=0.4)])
 
 
 # def plotter(data):
@@ -155,21 +153,21 @@ class LineGraph(BaseGraph):
 #     plt.show()
 
 
-def make_graph(graph: LineGraph):
-    graph.plot(line_color="#EBEE67", line_width=3, marker='o', markersize=7, markevery=slice(0, None, 8),
-               markerfacecolor='#E9FB2A', solid_capstyle='round',
-               path_effects=[patheffects.SimpleLineShadow(shadow_color='#331C7C', alpha=0.8), patheffects.Normal()])
+# def make_graph(graph: LineGraph):
+#     graph.plot(line_color="#EBEE67", line_width=3, marker='o', markersize=7, markevery=slice(0, None, 8),
+#                markerfacecolor='#E9FB2A', solid_capstyle='round',
+#                path_effects=[patheffects.SimpleLineShadow(shadow_color='#331C7C', alpha=0.8), patheffects.Normal()])
+#
+#     graph.enable_grid(axis='y')
+#     graph.set_fig_color(color='#51049E')
+#     graph.spine_config(spine_color="#E7F3F3", visibility=0.0, line_width=0.0)
+#     graph.axis_locator_formatter()
+#     graph.add_annotation()
+#     graph.tick_config()
+#     graph.set_title(country='United States', _type='TOTAL DEATHS')
+#     graph.show_graph()
+#     graph.save_graph("../cases.png", color="#51049E")
 
-    graph.enable_grid(axis='y')
-    graph.set_fig_color(color='#51049E')
-    graph.spine_config(spine_color="#E7F3F3", visibility=0.0, line_width=0.0)
-    graph.axis_locator_formatter()
-    graph.add_annotation()
-    graph.tick_config()
-    graph.set_title(country='UAE', _type='TOTAL CASES')
-    graph.show_graph()
 
-
-x, y = DataHandler().case_data(iso="ARE")
-make_graph(LineGraph(x=x, y=y, logscale=True))
-# plotter(DataHandler().case_data(iso="ARE"))
+# x, y = DataHandler(iso="USA").death_data()
+# make_graph(LineGraph(x=x, y=y, logscale=False))

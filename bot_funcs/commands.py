@@ -1,10 +1,12 @@
-from telegram import Update, ForceReply, ReplyKeyboardRemove
 import logging
-from helpers.namer import get_chat_name
 from datetime import datetime
-from telegram.ext import CallbackContext
-from scrapers.worldometer import WorldMeter
 
+from telegram import Update, ForceReply, ReplyKeyboardRemove
+from telegram.ext import CallbackContext
+
+from helpers.namer import get_chat_name
+from scrapers.worldometer import WorldMeter
+from graphing.ui.datas import remove_all_user_data
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(lineno)d - %(message)s', level=logging.INFO)
 
@@ -61,7 +63,6 @@ def uae(update: Update, context: CallbackContext) -> None:
 
 
 def world(update: Update, context: CallbackContext) -> None:
-
     chat_id = update.effective_chat.id
 
     context.bot.send_chat_action(chat_id=chat_id, action='typing')
@@ -102,7 +103,8 @@ def receive_feedback(update: Update, context: CallbackContext) -> int:
 def cancel(update: Update, context: CallbackContext) -> int:
     context.bot.send_message(chat_id=update.effective_chat.id, text="Cancelled.",
                              reply_markup=ReplyKeyboardRemove(selective=True))
-
     logging.info(msg=f"\nThe user cancelled the request.\n\n")
+
+    remove_all_user_data(context)
 
     return -1

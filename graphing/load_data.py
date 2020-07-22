@@ -6,9 +6,11 @@ import pandas as pd
 
 class DataHandler:
 
-    def __init__(self):
-        self.conn = sqlite3.connect('covid_data.db')
+    def __init__(self, iso: str = None):
+        self.conn = sqlite3.connect('graphing/covid_data.db')
         self.c = self.conn.cursor()
+
+        self.iso = iso
 
     def convert_to_sql(self):
         df = pd.read_csv('owid-covid-data.csv')
@@ -19,13 +21,15 @@ class DataHandler:
         """Executes the given query and returns it."""
         return self.c.execute(query)
 
-    def case_data(self, iso: str, till: str = None, new: str = None):
+    def case_data(self, _type: str):
+        result = self.c.execute(f"SELECT date, {_type} from world_covid_data where new_cases >= 1 and "
+                                f"iso_code='{self.iso}';")
 
-        result = self.c.execute(f"SELECT date, total_cases from world_covid_data where new_cases >= 1 and "
-                                f"iso_code = '{iso}'")
-        data = result.fetchall()
-        new_data = self.converter_n_splitter(data, split=True)
-        return new_data
+        return self.converter_n_splitter(result.fetchall(), split=True)
+
+    def death_data(self, _type: str):
+        result = self.c.execute(f"SELECT date, {_type} from world_covid_data where iso_code='{self.iso}';")
+        return self.converter_n_splitter(result.fetchall(), split=True)
 
     @staticmethod
     def converter_n_splitter(data, split: bool = False):
@@ -41,6 +45,3 @@ class DataHandler:
                 other_data.append(data[index][1])
 
         return data if not split else (dates, other_data)
-
-
-DataHandler().case_data(iso="ARE")
