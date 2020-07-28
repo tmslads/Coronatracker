@@ -1,12 +1,12 @@
-from matplotlib import pyplot as plt, patheffects
 import matplotlib
+from matplotlib import pyplot as plt, patheffects
 from matplotlib.font_manager import FontProperties
 
 
 class BaseGraph:
     def __init__(self, **kwargs):
         matplotlib.use('agg')
-        self.canvas, self.ax = plt.subplots(1, 1, figsize=(10, 8), **kwargs)  # Fig size is perfect for 1920x1080
+        self.canvas, self.ax = plt.subplots(figsize=(10, 8), **kwargs)  # Fig size is perfect for 1920x1080
 
         self.ax.spines['top'].set_visible(False)
         self.ax.spines['right'].set_visible(False)
@@ -40,16 +40,23 @@ class BaseGraph:
     def set_title(self, _type: str, country: str):
         fp = FontProperties(family='Product Sans', variant='small-caps', stretch=420, weight='extra bold', size=20)
 
-        self.canvas.suptitle(t=f"{_type}",
-                             fontproperties=fp, color="#F9C027", ha='center', x=0.51,
+        self.canvas.suptitle(t=f"{_type}", fontproperties=fp, color="#F9C027", ha='center', x=0.51,
                              path_effects=[patheffects.withSimplePatchShadow(shadow_rgbFace='#2C2C2C', alpha=0.7)],
                              clip_on=False, wrap=True)
 
         self.ax.set_title(label=f"{country}",
                           fontdict={'fontname': 'Product Sans', 'size': 21, 'weight': 'semibold', 'color': '#EEEEEE'},
                           loc='center', pad=6.0,
-                          path_effects=[patheffects.withSimplePatchShadow(shadow_rgbFace='#2C2C2C', alpha=0.55),
-                                        patheffects.Normal()], clip_on=False, wrap=True)
+                          path_effects=[patheffects.withSimplePatchShadow(shadow_rgbFace='#2C2C2C', alpha=0.55)],
+                          clip_on=False, wrap=True)
+
+    def enable_legend(self):
+        legend = self.ax.legend(
+            prop=FontProperties(family='Product Sans', variant='normal', stretch="semi-condensed", weight='book',
+                                size=10), shadow=True, numpoints=2, markerscale=0.8, edgecolor='white')
+
+        legend.set_title(title="LEGEND",
+                         prop=FontProperties(family="Product Sans", weight="semibold", size=12, stretch="normal"))
 
     def save_graph(self, path: str, color: str, **kwargs):
         self.canvas.savefig(fname=path, facecolor=color, **kwargs)

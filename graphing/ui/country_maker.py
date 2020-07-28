@@ -3,7 +3,8 @@ import logging
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import CallbackContext
 
-from .datas import COUNTRY_SELECTOR, generate_country_list, country_msg
+from .datas import COUNTRY_SELECTOR, country_msg
+from .utility import generate_country_list
 
 
 def make_country_list(update: Update, context: CallbackContext) -> COUNTRY_SELECTOR:

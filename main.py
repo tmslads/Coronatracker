@@ -6,9 +6,11 @@ from telegram import Update
 from telegram.ext import (Updater, CommandHandler, PicklePersistence, CallbackQueryHandler, CallbackContext,
                           MessageHandler, Filters, ConversationHandler)
 
+import graphing.ui.utility
 from bot_funcs.commands import start, world, uae, helper, ask_feedback, receive_feedback, cancel
 from bot_funcs.alert import new_cases_alert, opt_in_out, update_alert
 from graphing.ui import datas, entry, navigation, country_maker, trends_ui
+from graphing import load_data
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(lineno)d - %(message)s', level=logging.INFO)
 
@@ -94,15 +96,17 @@ if __name__ == "__main__":
                                                        pattern="back_trends"),
                                   CallbackQueryHandler(callback=trends_ui.toggle_log, pattern="log")],
 
-            ConversationHandler.TIMEOUT: [MessageHandler(callback=datas.remove_user_data, filters=Filters.all)]
+            ConversationHandler.TIMEOUT: [MessageHandler(callback=graphing.ui.utility.remove_user_data,
+                                                         filters=Filters.all)]
 
         }, fallbacks=[CommandHandler(command='cancel', callback=cancel)], conversation_timeout=120))  # 2 min timeout
 
     # Random text to bot-
     dp.add_handler(MessageHandler(filters=Filters.text, callback=msgs))
 
-    updater.job_queue.run_repeating(callback=new_cases_alert, interval=90, first=1)
-    updater.job_queue.run_repeating(callback=datas.remove_all_user_data, interval=86400, first=2)
+    updater.job_queue.run_repeating(callback=new_cases_alert, interval=90, first=1)  # Run every 90 seconds
+    updater.job_queue.run_repeating(callback=graphing.ui.utility.remove_all_user_data, interval=86400, first=2)
+    updater.job_queue.run_repeating(callback=load_data.download_file, interval=3600, first=3)  # Run every hour
 
     data_view()
 

@@ -6,7 +6,7 @@ from telegram.ext import CallbackContext
 
 from helpers.namer import get_chat_name
 from scrapers.worldometer import WorldMeter
-from graphing.ui.datas import remove_all_user_data
+from graphing.ui.utility import remove_all_user_data
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(lineno)d - %(message)s', level=logging.INFO)
 

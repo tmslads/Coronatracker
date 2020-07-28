@@ -5,10 +5,10 @@ import logging
 from telegram import Update, InlineKeyboardMarkup
 from telegram.ext import CallbackContext
 
+from helpers.msg_deletor import del_msg
 from .country_maker import make_country_list
 from .datas import (entry_msg, entry_buttons, MAIN_SELECTOR, graph_buttons, selection_msg, TREND_SELECTOR,
                     user_selection, iso_codes, COUNTRY_SELECTOR)
-from helpers.msg_deletor import del_msg
 
 
 def go_back_to_main(update: Update, _: CallbackContext) -> MAIN_SELECTOR:
