@@ -25,8 +25,12 @@ class DataHandler:
         return self.c.execute(query)
 
     def case_data(self, _type: str):
-        result = self.c.execute(f"SELECT date, {_type} from world_covid_data where new_cases >= 1 and "
-                                f"iso_code='{self.iso}';")
+        if 'new' in _type:
+            result = self.c.execute(f"SELECT date, {_type} from world_covid_data where new_cases >= 1 and "
+                                    f"iso_code='{self.iso}' and total_cases is not null;")
+        else:
+            result = self.c.execute(f"SELECT date, {_type} from world_covid_data where "
+                                    f"iso_code='{self.iso}' and total_cases is not null;")
 
         return self.converter_n_splitter(result.fetchall(), split=True)
 

@@ -6,7 +6,7 @@ entry_msg = "Welcome to the graph selector. Choose your option by selecting one 
 
 selection_msg = "Selection: *()*\.\nChoose the which metric to display from the below buttons:"
 
-country_msg = "Select your country from the buttons below\.\n\nCurrent page: *()/6*"
+country_msg = "Select your country from the buttons below\.\n\nCurrent page: *()/9*"
 
 entry_buttons = [[InlineKeyboardButton(text="The World", callback_data="OWID_WRL")],
                  [InlineKeyboardButton(text="Country list", callback_data="country")]]
@@ -35,7 +35,7 @@ iso_codes = {'AFG': 'Afghanistan', 'ALB': 'Albania', 'DZA': 'Algeria', 'AGO': 'A
              'GNQ': 'Equatorial Guinea', 'ERI': 'Eritrea', 'EST': 'Estonia', 'ETH': 'Ethiopia', 'FIN': 'Finland',
              'FRA': 'France', 'GAB': 'Gabon', 'GMB': 'Gambia', 'GEO': 'Georgia', 'DEU': 'Germany', 'GHA': 'Ghana',
              'GIB': 'Gibraltar', 'GRC': 'Greece', 'GRL': 'Greenland', 'GRD': 'Grenada', 'GUM': 'Guam',
-             'GTM': 'Guatemala', 'GIN': 'Guinea', 'HTI': 'Haiti', 'HND': 'Honduras', 'HKG': 'Hong Kong',
+             'GTM': 'Guatemala', 'GIN': 'Guinea', 'HTI': 'Haiti', 'HND': 'Honduras',
              'HUN': 'Hungary', 'ISL': 'Iceland', 'IND': 'India', 'IDN': 'Indonesia', 'IRN': 'Iran', 'IRQ': 'Iraq',
              'IRL': 'Ireland', 'ISR': 'Israel', 'ITA': 'Italy', 'JAM': 'Jamaica', 'JPN': 'Japan', 'JOR': 'Jordan',
              'KAZ': 'Kazakhstan', 'KEN': 'Kenya', 'OWID_KOS': 'Kosovo', 'KWT': 'Kuwait', 'KGZ': 'Kyrgyzstan',
@@ -52,7 +52,7 @@ iso_codes = {'AFG': 'Afghanistan', 'ALB': 'Albania', 'DZA': 'Algeria', 'AGO': 'A
              'SGP': 'Singapore', 'SVK': 'Slovakia', 'SVN': 'Slovenia', 'SOM': 'Somalia', 'ZAF': 'South Africa',
              'KOR': 'South Korea', 'SSD': 'South Sudan', 'ESP': 'Spain', 'LKA': 'Sri Lanka', 'SDN': 'Sudan',
              'SWZ': 'Swaziland', 'SWE': 'Sweden', 'CHE': 'Switzerland', 'SYR': 'Syria', 'TWN': 'Taiwan',
-             'TJK': 'Tajikistan', 'TZA': 'Tanzania', 'THA': 'Thailand', 'TLS': 'Timor', 'TGO': 'Togo',
+             'TJK': 'Tajikistan', 'TZA': 'Tanzania', 'THA': 'Thailand', 'TGO': 'Togo',
              'TTO': 'Trinidad and Tobago', 'TUN': 'Tunisia', 'TUR': 'Turkey', 'UGA': 'Uganda', 'UKR': 'Ukraine',
              'ARE': 'United Arab Emirates', 'GBR': 'United Kingdom', 'USA': 'United States', 'URY': 'Uruguay',
              'UZB': 'Uzbekistan', 'VEN': 'Venezuela', 'VNM': 'Vietnam', 'ESH': 'Western Sahara', 'YEM': 'Yemen',

@@ -50,14 +50,16 @@ class Plotter(BaseGraph):
                                       arrowprops={'facecolor': '#02D4F5', 'headwidth': 12, 'edgecolor': '#13292B'},
                                       annotation_clip=False)
 
-        case_no = str(int(self.y[-1])).__len__()
+        case_no = format(int(self.y[-1]), ',d').__len__()
 
         if case_no >= 7:
             offset = 19
         elif 5 <= case_no:
             offset = 17
+        elif case_no == 4:
+            offset = 13
         else:
-            offset = 11
+            offset = 10
 
         self.ax.text(x=annotation.xy[0] + offset, y=annotation.xy[-1], s=format(int(self.y[-1]), ',d'), ha='center',
                      fontfamily='Product Sans', color='#FFFFFF', fontsize=14, fontweight='bold', va='center',

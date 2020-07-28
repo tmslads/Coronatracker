@@ -32,26 +32,23 @@ def generate_country_list():
     col = []
 
     rows = 0
-    columns = 0
 
     # Makes one page-
-    # country_list = [[InlineKeyboardButton(text=country, callback_data=iso) for (country, iso), col in
-    #                  zip(iso_codes.items(), range(columns))] for row in range(rows)]
+    # country_pages = [[InlineKeyboardButton(text=country, callback_data=iso) for (country, iso), col in
+    #                   zip(iso_codes.items(), range(columns))] for row in range(rows)]
 
     # Makes all pages-
+
     for iso_code, country in iso_codes.items():
-        if rows < 10:
-            if columns < 2:
-                col.append(InlineKeyboardButton(text=country, callback_data=iso_code))
-                columns += 1
-            else:
-                country_list.append(col)
-                columns = 0
-                rows += 1
-                col = []
-        else:
+        col.append(InlineKeyboardButton(text=country, callback_data=iso_code))
+
+        if len(col) == 2:
+            country_list.append(col)
+            rows += 1
+            col = []
+
+        if rows == 10:
             rows = 0
-            columns = 0
             country_pages.append(country_list)
             country_list = []
     else:
@@ -60,12 +57,15 @@ def generate_country_list():
     return country_pages
 
 
-# def verify_list(a=generate_country_list):
+# def verify_country_list(a=generate_country_list):
 #     l = a()
+#     counter = 0
 #     for element in l:
 #         for sub in element:
 #             for sub_2 in sub:
 #                 print(sub_2.text)
+#                 counter += 1
+#     assert counter == len(iso_codes), f"Counted: {counter}, Actual: {len(iso_codes)}"
 
 
 def rolling_avg(data: list, average_days: int) -> list:
@@ -81,3 +81,6 @@ def rolling_avg(data: list, average_days: int) -> list:
         result[i] = total / average_days
 
     return result
+
+
+# verify_country_list()
