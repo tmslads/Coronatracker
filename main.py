@@ -90,14 +90,16 @@ if __name__ == "__main__":
                                    CallbackQueryHandler(callback=navigation.go_back_to_countries,
                                                         pattern="back_countries"),
                                    CallbackQueryHandler(callback=trends_ui.chosen_trend,
-                                                        pattern="total_cases|new_cases|total_deaths|new_deaths")],
+                                                        pattern="total_cases|new_cases|total_deaths|new_deaths|"
+                                                                "total_tests|new_tests")],
 
             datas.GRAPH_OPTIONS: [CallbackQueryHandler(callback=navigation.go_back_to_graph_buttons,
                                                        pattern="back_trends"),
                                   CallbackQueryHandler(callback=trends_ui.toggle_log, pattern="log")],
 
             ConversationHandler.TIMEOUT: [MessageHandler(callback=graphing.ui.utility.remove_user_data,
-                                                         filters=Filters.all)]
+                                                         filters=Filters.all),
+                                          CallbackQueryHandler(callback=graphing.ui.utility.remove_user_data)]
 
         }, fallbacks=[CommandHandler(command='cancel', callback=cancel)], conversation_timeout=120))  # 2 min timeout
 

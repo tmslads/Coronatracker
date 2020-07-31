@@ -38,17 +38,39 @@ class DataHandler:
         result = self.c.execute(f"SELECT date, {_type} from world_covid_data where iso_code='{self.iso}';")
         return self.converter_n_splitter(result.fetchall(), split=True)
 
+    def tests_data(self, _type: str, with_dates: bool = False):
+        if with_dates:
+            query = "date,"
+        else:
+            query = ""
+
+        result = self.c.execute(f"SELECT {query}{_type} from world_covid_data where iso_code='{self.iso}' "
+                                f"and total_cases is not null and tests_units is not null;").fetchall()
+
+        if not result:
+            return False
+
+        if with_dates:
+            return self.converter_n_splitter(result, split=True)
+        else:
+            return [0 if obj[0] is None else obj[0] for obj in result]
+
     @staticmethod
     def converter_n_splitter(data, split: bool = False):
         dates = []
         other_data = []
 
         for index, entry in enumerate(data[:]):
-            data[index] = list(entry)
+            data[index] = list(entry)  # entry is a tuple
+
             data[index][0] = datetime.strptime(entry[0], "%Y-%m-%d")
 
             if split:
                 dates.append(data[index][0])
+
+                if data[index][1] is None:
+                    data[index][1] = 0
+
                 other_data.append(data[index][1])
 
         return data if not split else (dates, other_data)

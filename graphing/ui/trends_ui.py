@@ -1,4 +1,5 @@
 import logging
+from datetime import timedelta
 
 from matplotlib import patheffects
 from telegram import Update, InlineKeyboardMarkup
@@ -6,7 +7,7 @@ from telegram.ext import CallbackContext
 
 from graphing.graph_objects.plotter import Plotter
 from helpers.msg_deletor import del_msg
-from .datas import GRAPH_OPTIONS, user_selection, iso_codes, trend_buttons
+from .datas import GRAPH_OPTIONS, user_selection, iso_codes, trend_buttons, TREND_SELECTOR
 from .utility import trend_to_human_readable, rolling_avg
 from ..load_data import DataHandler
 
@@ -27,6 +28,18 @@ def chosen_trend(update: Update, context: CallbackContext) -> GRAPH_OPTIONS:
     if 'case' in chosen:
         context.user_data['trend_data'] = country_data.case_data(_type=user_selection['trend'])
 
+    elif 'test' in chosen:
+        if user_selection['country'] == "OWID_WRL":
+            update.callback_query.answer(text="Test data is only available per country!")
+            return TREND_SELECTOR
+
+        test_data = country_data.tests_data(_type=user_selection['trend'], with_dates=True)
+
+        if not test_data:
+            update.callback_query.answer(text="Test data for this country is unavailable!")
+            return TREND_SELECTOR
+
+        context.user_data['trend_data'] = test_data
     else:
         context.user_data['trend_data'] = country_data.death_data(_type=user_selection['trend'])
 
@@ -41,16 +54,15 @@ def chosen_trend(update: Update, context: CallbackContext) -> GRAPH_OPTIONS:
 
     context.dispatcher.persistence.flush()  # Force save
 
+    moving_avg, is_bar, y_data = None, None, context.user_data['trend_data'][1]
+
     # Make graph with bars if trend type selected was new cases/deaths or normal-
-
     if "new" in chosen:
-        y_data = context.user_data['trend_data'][1]
-        send_graph(update, context, x=context.user_data['trend_data'][0], y=y_data,
-                   country=context.user_data['covid_country'], moving_avg=rolling_avg(y_data, 7), is_bar=True)
+        moving_avg = rolling_avg(y_data, 7)
+        is_bar = True
 
-    else:
-        send_graph(update, context, x=context.user_data['trend_data'][0], y=context.user_data['trend_data'][1],
-                   country=context.user_data['covid_country'])
+    send_graph(update, context, x=context.user_data['trend_data'][0], y=y_data,
+               country=context.user_data['covid_country'], moving_avg=moving_avg, is_bar=is_bar)
 
     return GRAPH_OPTIONS
 
@@ -68,8 +80,19 @@ def send_graph(update: Update, context: CallbackContext, x: list, y: list, count
 
     del_msg(update, context)
 
+    img_caption = ""
+
+    if 'test' in user_selection['trend']:
+        img_caption = "Test data can be missing for days for few countries\. Expect some discrepancies in " \
+                      "the graph\.\n\n"
+
+    img_caption += f"_Data last fetched on: " \
+                   f"{(context.bot_data['last_data_dl_date'] - timedelta(hours=4)).strftime('%B %d, %Y at %H:%M:%S')}" \
+                   f" UTC_"
+
     context.bot.send_photo(chat_id=chat_id, message_id=update.effective_message.message_id,
-                           photo=open(f"graphing/{pic}.png", "rb"), reply_markup=InlineKeyboardMarkup(trend_buttons))
+                           photo=open(f"graphing/{pic}.png", "rb"), reply_markup=InlineKeyboardMarkup(trend_buttons),
+                           caption=img_caption, parse_mode="MarkdownV2")
 
 
 def make_graph(country: str, trend_type: str, save_loc: str, graph: Plotter, rolling_data: list = None,
@@ -120,8 +143,10 @@ def toggle_log(update: Update, context: CallbackContext) -> GRAPH_OPTIONS:
     # Check log state and reassign to 'toggle'-
     if not context.user_data['log']:
         context.user_data['log'] = True
+        trend_buttons[0][-1].text = "Log scale ✅"
     else:
         context.user_data['log'] = False
+        trend_buttons[0][-1].text = "Log scale ❌"
 
     context.dispatcher.persistence.flush()  # Force save
 

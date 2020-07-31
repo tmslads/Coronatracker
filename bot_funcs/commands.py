@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 
 from telegram import Update, ForceReply, ReplyKeyboardRemove
 from telegram.ext import CallbackContext
@@ -56,7 +56,7 @@ def uae(update: Update, context: CallbackContext) -> None:
           f"Tests/1M population: {totals[8]}\n\n" \
           f"There's roughly 1 case in every {totals[10]} people, 1 death in every {totals[11]} " \
           f"people and 1 test done in every {totals[12]} people\.\n\n" \
-          f"_Last updated on {datetime.utcnow().strftime('%B %d, %Y at %H:%M:%S')} UTC_"
+          f"_Last updated on {datetime.now(timezone.utc).strftime('%B %d, %Y at %H:%M:%S')} UTC_"
 
     context.bot.send_message(chat_id=chat_id, text=msg, parse_mode="MarkdownV2")
     logging.info(f"\n{update.effective_user.first_name} just used /uae in {get_chat_name(update)}.\n\n")
@@ -72,7 +72,7 @@ def world(update: Update, context: CallbackContext) -> None:
           f"`☣ Infected: {total}\n" \
           f"☠ Dead: {dead}\n" \
           f"🩹 Recoveries: {recovered}`\n\n" \
-          f"_Last updated on {datetime.utcnow().strftime('%B %d, %Y at %H:%M:%S')} UTC_"
+          f"_Last updated on {datetime.now(timezone.utc).strftime('%B %d, %Y at %H:%M:%S')} UTC_"
 
     context.bot.send_message(chat_id=chat_id, text=msg, parse_mode='MarkdownV2')
     logging.info(f"\n{update.effective_user.first_name} just used /world in {get_chat_name(update)}.\n\n")

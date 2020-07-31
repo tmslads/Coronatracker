@@ -8,7 +8,7 @@ from telegram.ext import CallbackContext
 from helpers.msg_deletor import del_msg
 from .country_maker import make_country_list
 from .datas import (entry_msg, entry_buttons, MAIN_SELECTOR, graph_buttons, selection_msg, TREND_SELECTOR,
-                    user_selection, iso_codes, COUNTRY_SELECTOR)
+                    user_selection, iso_codes, COUNTRY_SELECTOR, trend_buttons)
 
 
 def go_back_to_main(update: Update, _: CallbackContext) -> MAIN_SELECTOR:
@@ -32,6 +32,7 @@ def go_back_to_graph_buttons(update: Update, context: CallbackContext) -> None:
                              reply_markup=InlineKeyboardMarkup(graph_buttons), parse_mode="MarkdownV2")
 
     context.user_data['log'] = False  # Reset log to False if user left from log=True state.
+    trend_buttons[0][-1].text = "Log scale ❌"
 
     return TREND_SELECTOR
 

@@ -15,10 +15,12 @@ graph_buttons = [[InlineKeyboardButton(text="<< Back", callback_data='back')],
                  [InlineKeyboardButton(text="Total cases", callback_data="total_cases"),
                   InlineKeyboardButton(text="New cases", callback_data="new_cases")],
                  [InlineKeyboardButton(text="Total deaths", callback_data="total_deaths"),
-                  InlineKeyboardButton(text="New deaths", callback_data="new_deaths")]]
+                  InlineKeyboardButton(text="New deaths", callback_data="new_deaths")],
+                 [InlineKeyboardButton(text="Total tests", callback_data="total_tests"),
+                  InlineKeyboardButton(text="New tests", callback_data="new_tests")]]
 
 trend_buttons = [[InlineKeyboardButton(text="<< Back", callback_data='back_trends'),
-                 InlineKeyboardButton(text="Log scale ", callback_data="log")]]
+                 InlineKeyboardButton(text="Log scale ❌", callback_data="log")]]
 
 user_selection = {'country': None, 'trend': None, 'log': False}  # This will be used to generate graph
 
@@ -57,5 +59,7 @@ iso_codes = {'AFG': 'Afghanistan', 'ALB': 'Albania', 'DZA': 'Algeria', 'AGO': 'A
              'ARE': 'United Arab Emirates', 'GBR': 'United Kingdom', 'USA': 'United States', 'URY': 'Uruguay',
              'UZB': 'Uzbekistan', 'VEN': 'Venezuela', 'VNM': 'Vietnam', 'ESH': 'Western Sahara', 'YEM': 'Yemen',
              'ZMB': 'Zambia', 'ZWE': 'Zimbabwe'}
+
+# country_to_iso = {v: k for k, v in iso_codes.items()}
 
 MAIN_SELECTOR, COUNTRY_SELECTOR, TREND_SELECTOR, GRAPH_OPTIONS = range(0, 4)
