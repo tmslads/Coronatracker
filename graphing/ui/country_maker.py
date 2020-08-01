@@ -8,8 +8,7 @@ from .utility import generate_country_list
 
 
 def make_country_list(update: Update, context: CallbackContext) -> COUNTRY_SELECTOR:
-    logging.info(msg=f"\nIn make_country_list func.\n\n")
-
+    """Fetches the country page and modifies it in-place to include main menu and previous/next page buttons."""
     if 'current_page' not in context.user_data:
         context.user_data['current_page'] = 1
     if 'country_list' not in context.user_data:
@@ -20,7 +19,8 @@ def make_country_list(update: Update, context: CallbackContext) -> COUNTRY_SELEC
 
     country_page = country_list[page - 1].copy()  # Make deep copy of list to prevent errors
 
-    logging.info(msg=f"On page {page}")
+    logging.info(msg=f"{update.callback_query.from_user.name} is on page {page}.")
+
     if page == 1:
         country_page.insert(0, [InlineKeyboardButton(text="Next Page >", callback_data="next_page")])
     elif 1 < page < 9:
@@ -32,6 +32,7 @@ def make_country_list(update: Update, context: CallbackContext) -> COUNTRY_SELEC
 
     country_page.insert(0, [InlineKeyboardButton(text="<< Main menu", callback_data="back_main")])
 
+    update.callback_query.answer()
     update.callback_query.edit_message_text(text=country_msg.replace('()', str(page)), parse_mode="MarkdownV2",
                                             reply_markup=InlineKeyboardMarkup(country_page))
 

@@ -26,7 +26,13 @@ def msgs(update: Update, context: CallbackContext):
         context.bot.send_message(chat_id=update.effective_chat.id, text="There is already a /graphs instance in use!",
                                  reply_to_message_id=update.effective_message.message_id)
 
-        logging.info(f"{update.effective_user.full_name} used /graphs before timeout.\n\n")
+        logging.info(f"{update.effective_user.name} used /graphs before timeout.\n\n")
+        return
+
+    elif msg == "/cancel":
+        context.bot.send_message(chat_id=update.effective_chat.id, text="There is... nothing to cancel.",
+                                 reply_to_message_id=update.effective_message.message_id)
+        logging.info(f"{update.effective_user.name} used /cancel for no reason.\n\n")
         return
 
     logging.info(f"{update.effective_user.full_name} said {msg}.")
@@ -74,26 +80,26 @@ if __name__ == "__main__":
 
     # For graphs-
     dp.add_handler(ConversationHandler(
-        entry_points=[CommandHandler(command="graphs", callback=entry.call_graph_command)], states={
-            datas.MAIN_SELECTOR: [CallbackQueryHandler(callback=entry.show_graph_buttons, pattern="OWID_WRL"),
+        entry_points=[CommandHandler(command="graphs", callback=entry.call_graph_command)],
+
+        states={
+            datas.MAIN_SELECTOR: [CallbackQueryHandler(callback=entry.show_trend_buttons, pattern="OWID_WRL"),
                                   CallbackQueryHandler(callback=country_maker.make_country_list, pattern="country")],
 
             datas.COUNTRY_SELECTOR: [CallbackQueryHandler(callback=navigation.go_back_to_main, pattern="back_main"),
                                      CallbackQueryHandler(callback=navigation.previous_page, pattern="previous_page"),
                                      CallbackQueryHandler(callback=navigation.next_page, pattern="next_page"),
-                                     CallbackQueryHandler(callback=entry.show_graph_buttons,
+                                     CallbackQueryHandler(callback=entry.show_trend_buttons,
                                                           pattern="|".join(datas.iso_codes))],
 
             datas.TREND_SELECTOR: [CallbackQueryHandler(callback=navigation.go_back_to_main, pattern="back_main"),
-                                   CallbackQueryHandler(callback=navigation.go_back_to_countries,
-                                                        pattern="back_countries"),
                                    CallbackQueryHandler(callback=navigation.go_back_to_countries,
                                                         pattern="back_countries"),
                                    CallbackQueryHandler(callback=trends_ui.chosen_trend,
                                                         pattern="total_cases|new_cases|total_deaths|new_deaths|"
                                                                 "total_tests|new_tests|positivity_rate")],
 
-            datas.GRAPH_OPTIONS: [CallbackQueryHandler(callback=navigation.go_back_to_graph_buttons,
+            datas.GRAPH_OPTIONS: [CallbackQueryHandler(callback=navigation.go_back_to_trend_buttons,
                                                        pattern="back_trends"),
                                   CallbackQueryHandler(callback=trends_ui.toggle_log, pattern="log")],
 
@@ -101,7 +107,8 @@ if __name__ == "__main__":
                                                          filters=Filters.all),
                                           CallbackQueryHandler(callback=graphing.ui.utility.remove_user_data)]
 
-        }, fallbacks=[CommandHandler(command='cancel', callback=cancel)], conversation_timeout=120))  # 2 min timeout
+        },
+        fallbacks=[CommandHandler(command='cancel', callback=cancel)], conversation_timeout=120))  # 2 min timeout
 
     # Random text to bot-
     dp.add_handler(MessageHandler(filters=Filters.text, callback=msgs))

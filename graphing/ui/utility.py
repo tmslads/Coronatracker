@@ -1,5 +1,7 @@
 import logging
 import os
+import re
+from typing import List
 
 from telegram import Update, InlineKeyboardButton
 from telegram.ext import CallbackContext
@@ -8,15 +10,28 @@ from graphing.ui.datas import iso_codes
 
 
 def trend_to_human_readable(trend: str) -> str:
+    """
+    Remove underscores from string and apply uppercase.
+
+    Args:
+        trend (str): String to process.
+    """
     return trend.replace('_', ' ').upper()
 
 
 def remove_user_data(update: Update, context: CallbackContext) -> None:
+    """
+    Remove stored data for that particular user.
+
+    Args:
+        update (Update): Required update object by python-telegram-bot.
+        context (CallbackContext): Required context object by python-telegram-bot.
+    """
     # Commented out in case we need to delete specific items from user_data only-
     # for data in {'covid_country', 'covid_trend_pic', 'log', 'trend_data', 'country_list', 'country_page'}:
     #     del context.user_data[data]
     #     logging.info(f"Deleted {data} for {update.effective_user.full_name}!\n")
-    os.remove(path=f"graphing/{context.user_data['covid_trend_pic']}.png")
+    del_pic(context)
 
     context.user_data.clear()
 
@@ -26,11 +41,14 @@ def remove_user_data(update: Update, context: CallbackContext) -> None:
 
 
 def remove_all_user_data(context: CallbackContext) -> None:
+    """
+    Remove all stored user data.
+
+    Args:
+        context (CallbackContext): Required context object by python-telegram-bot.
+    """
     # print(context.dispatcher.user_data.values())
-    try:
-        os.remove(path=f"graphing/{context.user_data['covid_trend_pic']}.png")
-    except FileNotFoundError:
-        pass
+    del_pic(context)
 
     for user in context.dispatcher.user_data.values():
         user.clear()
@@ -39,7 +57,24 @@ def remove_all_user_data(context: CallbackContext) -> None:
     logging.info(f"All data for all users is deleted!\n\n")
 
 
-def generate_country_list():
+def del_pic(context: CallbackContext) -> None:
+    """
+    Delete the picture which matplotlib stored.
+
+    Args:
+        context (CallbackContext): Required context object by python-telegram-bot.
+    """
+    try:
+        os.remove(path=f"graphing/{context.user_data['covid_trend_pic']}.png")
+    except (FileNotFoundError, TypeError, KeyError):
+        pass
+
+
+def generate_country_list() -> List[List[List[InlineKeyboardButton]]]:
+    """
+    Make the country list and separate them into 9 pages. Each page contains 2 columns, 10 rows for a total
+    of 20 buttons (i.e countries).
+    """
     country_pages = []
     country_list = []
     col = []
@@ -81,7 +116,14 @@ def generate_country_list():
 #     assert counter == len(iso_codes), f"Counted: {counter}, Actual: {len(iso_codes)}"
 
 
-def rolling_avg(data: list, average_days: int) -> list:
+def rolling_avg(data: List[float], average_days: int) -> list:
+    """
+    Calculate the rolling average of the data provided.
+
+    Args:
+        data (list): Data which contains float or integers to calculate the rolling average of.
+        average_days (int): Number to average out of.
+    """
     total = 0
     result = [0 for _ in data]
 
@@ -94,5 +136,21 @@ def rolling_avg(data: list, average_days: int) -> list:
         result[i] = total / average_days
 
     return result
+
+
+def remove_emojis(text: str) -> str:
+    """
+    Remove emojis from given string using regex.
+
+    Args:
+        text (str): The text to remove the emoji(s) from.
+    """
+    pattern = re.compile(pattern="["
+                                 u"\U0001F600-\U0001F64F"  # emoticons
+                                 u"\U0001F300-\U0001F5FF"  # symbols & pictographs
+                                 u"\U0001F680-\U0001F6FF"  # transport & map symbols
+                                 u"\U0001F1E0-\U0001F1FF"  # flags (iOS)
+                                 "]+", flags=re.UNICODE)
+    return pattern.sub(r'', text)
 
 # verify_country_list()

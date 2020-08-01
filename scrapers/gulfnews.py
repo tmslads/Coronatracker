@@ -13,6 +13,7 @@ class GulfNews(object):
 
     def breaking(self):
         latest_breaking = self.soup.find_all(class_='card-title')
+
         for breaking in latest_breaking:
             title = breaking.a.get_text().strip().replace('  ', ' ')
             pattern1 = re.compile("\A(UAE|Coronavirus: UAE|COVID(-|\s)*19: UAE) (announces|reports) (\d+) "
