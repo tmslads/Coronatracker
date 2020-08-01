@@ -17,7 +17,8 @@ graph_buttons = [[InlineKeyboardButton(text="<< Back", callback_data='back')],
                  [InlineKeyboardButton(text="Total deaths", callback_data="total_deaths"),
                   InlineKeyboardButton(text="New deaths", callback_data="new_deaths")],
                  [InlineKeyboardButton(text="Total tests", callback_data="total_tests"),
-                  InlineKeyboardButton(text="New tests", callback_data="new_tests")]]
+                  InlineKeyboardButton(text="New tests", callback_data="new_tests")],
+                 [InlineKeyboardButton(text="Positivity rate", callback_data="positivity_rate")]]
 
 trend_buttons = [[InlineKeyboardButton(text="<< Back", callback_data='back_trends'),
                  InlineKeyboardButton(text="Log scale ❌", callback_data="log")]]

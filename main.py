@@ -91,7 +91,7 @@ if __name__ == "__main__":
                                                         pattern="back_countries"),
                                    CallbackQueryHandler(callback=trends_ui.chosen_trend,
                                                         pattern="total_cases|new_cases|total_deaths|new_deaths|"
-                                                                "total_tests|new_tests")],
+                                                                "total_tests|new_tests|positivity_rate")],
 
             datas.GRAPH_OPTIONS: [CallbackQueryHandler(callback=navigation.go_back_to_graph_buttons,
                                                        pattern="back_trends"),

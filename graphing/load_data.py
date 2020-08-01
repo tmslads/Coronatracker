@@ -55,6 +55,14 @@ class DataHandler:
         else:
             return [0 if obj[0] is None else obj[0] for obj in result]
 
+    def pct_positive(self):
+        result = self.c.execute(f"SELECT date, (new_cases/new_tests)*100 from world_covid_data where "
+                                f"iso_code='{self.iso}' and new_tests > 0 and tests_units is not null;").fetchall()
+        if not result:
+            return False
+
+        return self.converter_n_splitter(result, split=True)
+
     @staticmethod
     def converter_n_splitter(data, split: bool = False):
         dates = []

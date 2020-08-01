@@ -1,4 +1,5 @@
 import logging
+import os
 
 from telegram import Update, InlineKeyboardButton
 from telegram.ext import CallbackContext
@@ -15,14 +16,26 @@ def remove_user_data(update: Update, context: CallbackContext) -> None:
     # for data in {'covid_country', 'covid_trend_pic', 'log', 'trend_data', 'country_list', 'country_page'}:
     #     del context.user_data[data]
     #     logging.info(f"Deleted {data} for {update.effective_user.full_name}!\n")
+    os.remove(path=f"graphing/{context.user_data['covid_trend_pic']}.png")
+
     context.user_data.clear()
+
+    context.dispatcher.persistence.flush()  # Force save
+
     logging.info(f"All data for {update.effective_user.full_name} is deleted!\n\n")
 
 
 def remove_all_user_data(context: CallbackContext) -> None:
     # print(context.dispatcher.user_data.values())
+    try:
+        os.remove(path=f"graphing/{context.user_data['covid_trend_pic']}.png")
+    except FileNotFoundError:
+        pass
+
     for user in context.dispatcher.user_data.values():
         user.clear()
+
+    context.dispatcher.persistence.flush()  # Force save
     logging.info(f"All data for all users is deleted!\n\n")
 
 
@@ -81,6 +94,5 @@ def rolling_avg(data: list, average_days: int) -> list:
         result[i] = total / average_days
 
     return result
-
 
 # verify_country_list()

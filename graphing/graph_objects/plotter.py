@@ -1,12 +1,9 @@
 from matplotlib import patheffects
 from matplotlib.dates import AutoDateLocator, ConciseDateFormatter, date2num
 from matplotlib.font_manager import FontProperties
-from matplotlib.ticker import EngFormatter
+from matplotlib.ticker import EngFormatter, PercentFormatter
 
 from ..graph_objects.basegraph import BaseGraph
-
-
-# from ..load_data import DataHandler
 
 
 class Plotter(BaseGraph):
@@ -33,17 +30,20 @@ class Plotter(BaseGraph):
     def bar_plot(self, bar_color: str, line_width: int, **kwargs):
         self.ax.bar(x=self.x, height=self.y, color=bar_color, linewidth=line_width, **kwargs)
 
-    def axis_locator_formatter(self):
+    def axis_locator_formatter(self, unit: str = ""):
         # Set date and a clever formatter-
         locator = AutoDateLocator()
         formatter = ConciseDateFormatter(locator)
 
         # Convert cases numbers to human readable form- Eg: 7000 -> 7k
-        human_format = EngFormatter(sep="")
+        if unit == "%":
+            human_format = PercentFormatter(decimals=1)
+        else:
+            human_format = EngFormatter(unit=unit, sep="")
 
         super().set_locator_formatter(x_locator=locator, x_formatter=formatter, y_formatter=human_format)
 
-    def add_annotation(self):
+    def add_annotation(self, is_pct: bool = False):
         # Put arrow head on last case
         annotation = self.ax.annotate("", xy=(date2num(self.x[-1]) + 3, self.y[-1]), xytext=(1, 0),
                                       textcoords='offset points', ha='center',
@@ -59,11 +59,11 @@ class Plotter(BaseGraph):
         elif case_no == 4:
             offset = 35
         else:
-            offset = 25
+            offset = 30
 
-        self.ax.annotate(text=format(int(self.y[-1]), ',d'), ha='center', va='center', fontweight='bold',
-                         xy=(annotation.xy[0], annotation.xy[-1]),
-                         xytext=(offset, 0), textcoords="offset points",
+        self.ax.annotate(text=f"{round(self.y[-1], 1)}%" if is_pct else format(int(self.y[-1]), ',d'), ha='center',
+                         va='center', fontweight='bold', xy=(annotation.xy[0], annotation.xy[-1]),
+                         xytext=((35 if is_pct else offset), 0), textcoords="offset points", annotation_clip=False,
                          path_effects=[patheffects.withSimplePatchShadow(shadow_rgbFace='#2C2C2C', alpha=0.2)],
                          clip_on=False, wrap=True, fontfamily='Product Sans', color='#FFFFFF', fontsize=14)
 

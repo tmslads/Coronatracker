@@ -28,18 +28,22 @@ def chosen_trend(update: Update, context: CallbackContext) -> GRAPH_OPTIONS:
     if 'case' in chosen:
         context.user_data['trend_data'] = country_data.case_data(_type=user_selection['trend'])
 
-    elif 'test' in chosen:
+    elif any(obj in chosen for obj in {'test', 'rate'}):
         if user_selection['country'] == "OWID_WRL":
-            update.callback_query.answer(text="Test data is only available per country!")
+            update.callback_query.answer(text=f"{trend_to_human_readable(chosen).capitalize()} is only available "
+                                              f"for individual countries!")
             return TREND_SELECTOR
 
-        test_data = country_data.tests_data(_type=user_selection['trend'], with_dates=True)
+        if "test" in chosen:
+            chosen_data = country_data.tests_data(_type=user_selection['trend'], with_dates=True)
+        else:
+            chosen_data = country_data.pct_positive()
 
-        if not test_data:
+        if not chosen_data:
             update.callback_query.answer(text="Test data for this country is unavailable!")
             return TREND_SELECTOR
 
-        context.user_data['trend_data'] = test_data
+        context.user_data['trend_data'] = chosen_data
     else:
         context.user_data['trend_data'] = country_data.death_data(_type=user_selection['trend'])
 
@@ -54,21 +58,22 @@ def chosen_trend(update: Update, context: CallbackContext) -> GRAPH_OPTIONS:
 
     context.dispatcher.persistence.flush()  # Force save
 
-    moving_avg, is_bar, y_data = None, None, context.user_data['trend_data'][1]
+    moving_avg, is_bar, y_data, is_pct = None, None, context.user_data['trend_data'][1], False
 
     # Make graph with bars if trend type selected was new cases/deaths or normal-
-    if "new" in chosen:
+    if any(obj in chosen for obj in {'new', 'rate'}):
         moving_avg = rolling_avg(y_data, 7)
         is_bar = True
+        is_pct = True if "rate" in chosen else False
 
     send_graph(update, context, x=context.user_data['trend_data'][0], y=y_data,
-               country=context.user_data['covid_country'], moving_avg=moving_avg, is_bar=is_bar)
+               country=context.user_data['covid_country'], moving_avg=moving_avg, is_bar=is_bar, is_pct=is_pct)
 
     return GRAPH_OPTIONS
 
 
 def send_graph(update: Update, context: CallbackContext, x: list, y: list, country: str, log: bool = False,
-               moving_avg: list = None, is_bar: bool = False) -> None:
+               moving_avg: list = None, is_bar: bool = False, is_pct: bool = False) -> None:
     chat_id = update.effective_chat.id
     pic = context.user_data['covid_trend_pic']
 
@@ -76,7 +81,7 @@ def send_graph(update: Update, context: CallbackContext, x: list, y: list, count
 
     make_graph(graph=Plotter(x=x, y=y, logscale=log), country=country,
                trend_type=trend_to_human_readable(user_selection['trend']), save_loc=f"graphing/{pic}.png",
-               rolling_data=moving_avg, is_bar=is_bar)
+               rolling_data=moving_avg, is_bar=is_bar, is_pct=is_pct)
 
     del_msg(update, context)
 
@@ -84,6 +89,11 @@ def send_graph(update: Update, context: CallbackContext, x: list, y: list, count
 
     if 'test' in user_selection['trend']:
         img_caption = "Test data can be missing for days for few countries\. Expect some discrepancies in " \
+                      "the graph\.\n\n"
+
+    elif 'rate' in user_selection['trend']:
+        img_caption = "Calculated by dividing the new cases by the new tests done at that day\.\nTest data can be " \
+                      "missing for days for few countries\. Expect some discrepancies in " \
                       "the graph\.\n\n"
 
     img_caption += f"_Data last fetched on: " \
@@ -96,7 +106,7 @@ def send_graph(update: Update, context: CallbackContext, x: list, y: list, count
 
 
 def make_graph(country: str, trend_type: str, save_loc: str, graph: Plotter, rolling_data: list = None,
-               is_bar: bool = False) -> None:
+               is_bar: bool = False, is_pct: bool = False) -> None:
     if is_bar and rolling_data:
         line_type = ROLLING_AVG
     else:
@@ -123,8 +133,13 @@ def make_graph(country: str, trend_type: str, save_loc: str, graph: Plotter, rol
     graph.enable_grid(axis='y')
     graph.set_fig_color(color='#51049E')
     graph.spine_config(spine_color="#E7F3F3", visibility=0.0, line_width=0.0)
-    graph.axis_locator_formatter()
-    graph.add_annotation()
+
+    if is_pct:
+        graph.axis_locator_formatter(unit="%")
+    else:
+        graph.axis_locator_formatter()
+
+    graph.add_annotation(is_pct=is_pct)
     graph.tick_config()
     graph.set_title(country=country, _type=trend_type)
     # graph.show_graph()
@@ -136,7 +151,7 @@ def toggle_log(update: Update, context: CallbackContext) -> GRAPH_OPTIONS:
         context.user_data['log'] = False
 
     # Don't show logarithmic scales for new cases/deaths-
-    if "new" in user_selection['trend']:
+    if any(obj in user_selection['trend'] for obj in {'new', 'rate'}):
         update.callback_query.answer(text="Logarithmic scale for this type of graph is not suitable!")
         return GRAPH_OPTIONS
 
