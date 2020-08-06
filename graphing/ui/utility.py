@@ -7,6 +7,7 @@ from telegram import Update, InlineKeyboardButton
 from telegram.ext import CallbackContext
 
 from graphing.ui.datas import iso_codes
+from helpers.msg_deletor import del_msg
 
 
 def trend_to_human_readable(trend: str) -> str:
@@ -30,14 +31,17 @@ def remove_user_data(update: Update, context: CallbackContext) -> None:
     # Commented out in case we need to delete specific items from user_data only-
     # for data in {'covid_country', 'covid_trend_pic', 'log', 'trend_data', 'country_list', 'country_page'}:
     #     del context.user_data[data]
-    #     logging.info(f"Deleted {data} for {update.effective_user.full_name}!\n")
+    #     logging.info(f"Deleted {data} for {update.effective_user.name}!\n")
     del_pic(context)
 
     context.user_data.clear()
 
     context.dispatcher.persistence.flush()  # Force save
 
-    logging.info(f"All data for {update.effective_user.full_name} is deleted!\n\n")
+    logging.info(f"All data for {update.effective_user.name} is deleted!\n\n")
+
+    del_msg(update, context)
+    logging.info(f"The /graphs msg for {update.effective_user.name} is deleted!\n\n")
 
 
 def remove_all_user_data(context: CallbackContext) -> None:

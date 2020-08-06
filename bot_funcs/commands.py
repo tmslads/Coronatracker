@@ -5,6 +5,7 @@ from telegram import Update, ForceReply, ReplyKeyboardRemove
 from telegram.ext import CallbackContext
 
 from helpers.namer import get_chat_name
+from helpers.msg_deletor import del_msg
 from scrapers.worldometer import WorldMeter
 from graphing.ui.utility import remove_all_user_data
 
@@ -88,7 +89,7 @@ def world(update: Update, context: CallbackContext) -> None:
 
 def ask_feedback(update: Update, context: CallbackContext) -> int:
     """Sends a message to the user asking for feedback. Called when user clicks /feedback."""
-    logging.info(msg=f"\n{update.effective_user.full_name} just used /feedback in {get_chat_name(update)}\n\n")
+    logging.info(msg=f"\n{update.effective_user.name} just used /feedback in {get_chat_name(update)}\n\n")
 
     context.bot.send_message(chat_id=update.effective_chat.id,
                              text="What would you like suggest? You can submit a bug report, feature request, "
@@ -101,7 +102,7 @@ def ask_feedback(update: Update, context: CallbackContext) -> int:
 def receive_feedback(update: Update, context: CallbackContext) -> int:
     """Get feedback from user, display in console and save to file."""
     with open("files/feedback.txt", 'a') as f:
-        feedback = f"{update.effective_user.full_name} suggested: {update.message.text}\n\n"
+        feedback = f"{update.effective_user.name} suggested: {update.message.text}\n\n"
         f.write(feedback)
 
     logging.info(msg=f'\n{feedback}')
@@ -112,6 +113,11 @@ def receive_feedback(update: Update, context: CallbackContext) -> int:
 
 def cancel(update: Update, context: CallbackContext) -> int:
     """Cancels the current operation."""
+    try:
+        del_msg(update, context, msg_no=1)
+    except Exception as e:
+        print(e)
+
     context.bot.send_message(chat_id=update.effective_chat.id, text="The command was cancelled.",
                              reply_markup=ReplyKeyboardRemove(selective=True))
     logging.info(msg=f"\nThe user cancelled the request.\n\n")

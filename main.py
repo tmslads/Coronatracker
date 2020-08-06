@@ -22,7 +22,7 @@ def data_view() -> None:
 
 def msgs(update: Update, context: CallbackContext):
     msg = update.message.text
-    if msg == "/graphs":
+    if msg == "/graphs" or msg == "/graphs@uaecoronabot":
         context.bot.send_message(chat_id=update.effective_chat.id, text="There is already a /graphs instance in use!",
                                  reply_to_message_id=update.effective_message.message_id)
 
@@ -35,7 +35,13 @@ def msgs(update: Update, context: CallbackContext):
         logging.info(f"{update.effective_user.name} used /cancel for no reason.\n\n")
         return
 
-    logging.info(f"{update.effective_user.full_name} said {msg}.")
+    logging.info(f"{update.effective_user.name} said {msg}.")
+
+
+def off_poll(update: Update, context: CallbackContext) -> None:
+    if update.effective_user.id == 476269395:
+        updater.stop()
+        context.bot.send_message(chat_id=476269395, text='stopped.')
 
 
 def alert_ppl(context: CallbackContext) -> None:
@@ -64,7 +70,7 @@ if __name__ == "__main__":
     updater = Updater(token=token, use_context=True, persistence=pp)
     dp = updater.dispatcher
 
-    for k, v in {'start': start, 'help': helper, 'world': world, 'uae': uae}.items():
+    for k, v in {'start': start, 'help': helper, 'world': world, 'uae': uae, 'stop': off_poll}.items():
         dp.add_handler(CommandHandler(command=k, callback=v))
 
     dp.add_handler(CommandHandler(command='alerts', callback=opt_in_out))
@@ -108,7 +114,7 @@ if __name__ == "__main__":
                                           CallbackQueryHandler(callback=graphing.ui.utility.remove_user_data)]
 
         },
-        fallbacks=[CommandHandler(command='cancel', callback=cancel)], conversation_timeout=120))  # 2 min timeout
+        fallbacks=[CommandHandler(command='cancel', callback=cancel)], conversation_timeout=300))  # 5 min timeout
 
     # Random text to bot-
     dp.add_handler(MessageHandler(filters=Filters.text, callback=msgs))

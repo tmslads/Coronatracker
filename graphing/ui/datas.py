@@ -2,7 +2,7 @@ from telegram import InlineKeyboardButton
 
 entry_msg = "Welcome to the graph selector. Choose your option by clicking one of the buttons below:\n\n" \
             "World - World coronavirus graphs\n" \
-            "Country - View graphs per country."
+            "Country - View graphs per country.\n\nClick /cancel to cancel."
 
 selection_msg = "Selection: *()*\.\nChoose the which metric to display from the buttons below:"
 
