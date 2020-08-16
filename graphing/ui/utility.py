@@ -40,8 +40,8 @@ def remove_user_data(update: Update, context: CallbackContext) -> None:
 
     logging.info(f"All data for {update.effective_user.name} is deleted!\n\n")
 
-    del_msg(update, context)
-    logging.info(f"The /graphs msg for {update.effective_user.name} is deleted!\n\n")
+    if del_msg(update, context, msg_no=1):
+        logging.info(f"The /graphs msg for {update.effective_user.name} is deleted!\n\n")
 
 
 def remove_all_user_data(context: CallbackContext) -> None:

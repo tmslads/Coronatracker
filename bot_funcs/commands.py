@@ -31,7 +31,7 @@ def helper(update: Update, context: CallbackContext) -> None:
 
     context.bot.send_message(chat_id=update.effective_chat.id, text=msg, parse_mode="MarkdownV2",
                              disable_web_page_preview=True)
-    logging.info(f"\n{update.effective_user.first_name} just used /help in {get_chat_name(update)}.\n\n")
+    logging.info(f"\n{update.effective_user.name} just used /help in {get_chat_name(update)}.\n\n")
 
 
 def start(update: Update, context: CallbackContext) -> None:
@@ -41,7 +41,7 @@ def start(update: Update, context: CallbackContext) -> None:
           "to get a list of commands."
 
     context.bot.send_message(chat_id=update.effective_chat.id, text=msg)
-    logging.info(f"\n{update.effective_user.first_name} just used /start in {get_chat_name(update)}.\n\n")
+    logging.info(f"\n{update.effective_user.name} just used /start in {get_chat_name(update)}.\n\n")
 
 
 def uae(update: Update, context: CallbackContext) -> None:
@@ -67,7 +67,7 @@ def uae(update: Update, context: CallbackContext) -> None:
           f"_Last updated on {datetime.now(timezone.utc).strftime('%B %d, %Y at %H:%M:%S')} UTC_"
 
     context.bot.send_message(chat_id=chat_id, text=msg, parse_mode="MarkdownV2")
-    logging.info(f"\n{update.effective_user.first_name} just used /uae in {get_chat_name(update)}.\n\n")
+    logging.info(f"\n{update.effective_user.name} just used /uae in {get_chat_name(update)}.\n\n")
 
 
 def world(update: Update, context: CallbackContext) -> None:
@@ -84,7 +84,7 @@ def world(update: Update, context: CallbackContext) -> None:
           f"_Last updated on {datetime.now(timezone.utc).strftime('%B %d, %Y at %H:%M:%S')} UTC_"
 
     context.bot.send_message(chat_id=chat_id, text=msg, parse_mode='MarkdownV2')
-    logging.info(f"\n{update.effective_user.first_name} just used /world in {get_chat_name(update)}.\n\n")
+    logging.info(f"\n{update.effective_user.name} just used /world in {get_chat_name(update)}.\n\n")
 
 
 def ask_feedback(update: Update, context: CallbackContext) -> int:
@@ -114,7 +114,7 @@ def receive_feedback(update: Update, context: CallbackContext) -> int:
 def cancel(update: Update, context: CallbackContext) -> int:
     """Cancels the current operation."""
     try:
-        del_msg(update, context, msg_no=1)
+        del_msg(update, context, msg_no=-1)
     except Exception as e:
         print(e)
 

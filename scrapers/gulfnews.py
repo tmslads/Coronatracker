@@ -8,7 +8,7 @@ GULFNEWS_URL = "https://gulfnews.com"
 
 class GulfNews(object):
     def __init__(self):
-        get = requests.get(GULFNEWS_URL)
+        get = requests.get(GULFNEWS_URL, timeout=100)
         self.soup = bs(get.content, features='html.parser')
 
     def breaking(self):

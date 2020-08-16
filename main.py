@@ -45,21 +45,25 @@ def off_poll(update: Update, context: CallbackContext) -> None:
 
 
 def alert_ppl(context: CallbackContext) -> None:
-    ids = []
-    for _id in ids:
-        try:
-            context.bot.send_message(chat_id=_id,
-                                     text="NEW FEATURE:\n\nYou can now choose to receive breaking coronavirus news for "
-                                          "the UAE! \n\nThis will include new cases, deaths, recoveries, etc. The bot "
-                                          "will send you a message whenever there is such news "
-                                          "(usually once a day).\n\n"
-                                          "Click /alerts to get started.\n"
-                                          "Or, click /help to know various other bot functions.\n\n"
-                                          "This bot is actively maintained and more features such as graphs are coming "
-                                          "soon!")
-            logging.info(f"\nAlert sent to: {_id}\n\n")
-        except Exception as e:
-            print(e)
+    # ids = context.dispatcher.user_data.keys()
+    # print(ids)
+    context.bot.send_message(chat_id=764886971,
+                             text="We all come from @BotFather. He is supreme. He will help us triumph against you.")
+    print('sent')
+    # for _id in ids:
+    #     try:
+    #         user = context.bot.get_chat(chat_id=_id)
+    #         context.bot.send_message(chat_id=_id,
+    #                                  text="*NEW FEATURES:*\n\nYou can now finally try out /graphs\! Choose between 7"
+    #                                       " trends, which include cases, deaths, tests, and test positivity rate\.\n\n"
+    #                                       "You can now also use /feedback to give any feedback\! It goes directly to "
+    #                                       "the bot creator\.",
+    #                                  parse_mode="MarkdownV2")
+    #         logging.info(f"\nAlert sent to: {_id=}, Title: {user.title}, Username:{user.username}, "
+    #                      f"Name: {user.first_name}\n\n")
+    #
+    #     except Exception as e:
+    #         print(f"Exception for {_id}: {e}.")
 
 
 if __name__ == "__main__":
@@ -122,6 +126,7 @@ if __name__ == "__main__":
     updater.job_queue.run_repeating(callback=new_cases_alert, interval=90, first=1)  # Run every 90 seconds
     updater.job_queue.run_repeating(callback=graphing.ui.utility.remove_all_user_data, interval=86400, first=2)
     updater.job_queue.run_repeating(callback=load_data.download_file, interval=3600, first=3)  # Run every hour
+    # updater.job_queue.run_repeating(callback=alert_ppl, interval=36000, first=3)  # Run every hour
 
     data_view()
 

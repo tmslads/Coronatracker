@@ -3,6 +3,7 @@ from datetime import datetime
 
 from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton, error
 from telegram.ext import CallbackContext
+from requests.exceptions import ConnectionError, ConnectTimeout
 
 from helpers.db_connector import connection
 from helpers.namer import get_chat_name
@@ -31,7 +32,11 @@ def new_cases_alert(context: CallbackContext) -> None:
     if 'sent_alert_today' not in context.bot_data:
         context.bot_data['sent_alert_today'] = datetime.today()
 
-    breaking_url = GulfNews().breaking()
+    try:
+        breaking_url = GulfNews().breaking()
+    except (ConnectionError, ConnectTimeout) as e:
+        logging.info(f"\nAn Exception raised while connecting:\n{e}")
+        breaking_url = None
 
     if breaking_url is None or breaking_url == context.bot_data['latest_breaking_url']:
         return
@@ -76,7 +81,7 @@ def opt_in_out(update: Update, context: CallbackContext) -> None:
     status = connection(query, update=update)  # Connect to db to get current settings
 
     context.bot.send_message(chat_id=chat_id, text=text.replace('()', status), reply_markup=markup)
-    logging.info(f"\n{update.effective_user.first_name} just used /alerts in {get_chat_name(update)}.\n\n")
+    logging.info(f"\n{update.effective_user.name} just used /alerts in {get_chat_name(update)}.\n\n")
 
 
 def update_alert(update: Update, context: CallbackContext) -> None:
@@ -99,5 +104,5 @@ def update_alert(update: Update, context: CallbackContext) -> None:
 
     update.callback_query.edit_message_text(text=update_text, reply_markup=markup)  # Update message to show change
     context.bot.answer_callback_query(callback_query_id=call_id)  # Answer the callback query in clients
-    logging.info(f"\n{update.effective_user.first_name} just toggled /alerts in {get_chat_name(update)} to "
+    logging.info(f"\n{update.effective_user.name} just toggled /alerts in {get_chat_name(update)} to "
                  f"{new_status}.\n\n")
