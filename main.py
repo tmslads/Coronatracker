@@ -54,8 +54,8 @@ def alert_ppl(context: CallbackContext) -> None:
     #     try:
     #         user = context.bot.get_chat(chat_id=_id)
     #         context.bot.send_message(chat_id=_id,
-    #                                  text="*NEW FEATURES:*\n\nYou can now finally try out /graphs\! Choose between 7"
-    #                                       " trends, which include cases, deaths, tests, and test positivity rate\.\n\n"
+    #                                  text="*NEW FEATURES:*\n\nYou can now finally try out /graphs\! Choose between 7 "
+    #                                       "trends, which include cases, deaths, tests, and test positivity rate\.\n\n"
     #                                       "You can now also use /feedback to give any feedback\! It goes directly to "
     #                                       "the bot creator\.",
     #                                  parse_mode="MarkdownV2")
@@ -71,7 +71,8 @@ if __name__ == "__main__":
         token = f.read()
 
     pp = PicklePersistence(filename="files/user_data")
-    updater = Updater(token=token, use_context=True, persistence=pp)
+    updater = Updater(token=token, use_context=True, persistence=pp,
+                      request_kwargs={'proxy_url': 'http://95.174.67.50:18080/'})
     dp = updater.dispatcher
 
     for k, v in {'start': start, 'help': helper, 'world': world, 'uae': uae, 'stop': off_poll}.items():
