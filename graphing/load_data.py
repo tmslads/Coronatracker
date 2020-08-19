@@ -139,7 +139,7 @@ def download_file(context: CallbackContext):
     logging.info("Beginning to download...")
 
     r = requests.get("https://covid.ourworldindata.org/data/owid-covid-data.csv", allow_redirects=True, stream=True,
-                     proxies={"https": 'socks5://127.0.0.1:9050'}, timeout=20)
+                     proxies=context.job.context['owid'], timeout=20)
     block_size = 1024
 
     total_size_in_bytes = (int(r.headers.get('content-length', 0)) / (32 * block_size))

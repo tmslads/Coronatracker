@@ -1,7 +1,11 @@
 import logging
+import sys
 import pickle
 import pprint
+import subprocess
 
+import requests
+from requests.exceptions import ReadTimeout
 from telegram import Update
 from telegram.ext import (Updater, CommandHandler, PicklePersistence, CallbackQueryHandler, CallbackContext,
                           MessageHandler, Filters, ConversationHandler)
@@ -66,13 +70,68 @@ def alert_ppl(context: CallbackContext) -> None:
     #         print(f"Exception for {_id}: {e}.")
 
 
+def enable_proxy(recheck: bool = False) -> None:
+    """
+    Enable proxy by running a Linux command to setup a localhost TOR proxy server.
+
+    Args:
+        recheck (bool): If `True`, check proxy is working properly by calling check_connection(). Default: `False`.
+    """
+    global proxy
+
+    logging.warning("\nATTEMPTING TO USE PROXY\n")
+
+    subprocess.Popen(['echo', f"'{sudo_pass}'", '|', 'sudo', '-S', 'systemctl', 'status', 'tor'])
+    proxy = {'ptb': {'proxy_url': "socks5://127.0.0.1:9050"}, 'owid': {"https": 'socks5://127.0.0.1:9050'}}
+
+    if recheck:
+        check_connection(proxy_on=True)
+
+
+def check_connection(proxy_on: bool = False):
+    """
+    Checks if connection to websites is censored by making a request to them. Uses a SOCKS5 proxy via TOR relay
+    if request timed out(restricted).
+
+    Args:
+        proxy_on (bool): If `True`, proxy is used to connect to website. Default: `False`.
+    """
+    try:
+        requests.get(f"https://api.telegram.org/bot{token}/getMe", timeout=12, proxies=proxy['owid'])
+        requests.get(f"https://ourworldindata.org", timeout=12, proxies=proxy['owid'])
+
+    except ReadTimeout:
+        if proxy_on:
+            logging.critical("\n\n\nFAILED TO CONNECT VIA PROXY, CHECK YOUR INTERNET CONNECTION!\n")
+            raise SystemExit
+        else:
+            logging.warning("\nFAILED TO ESTABLISH CONNECTION.\n\n")
+            enable_proxy(recheck=True)
+
+    except Exception as e:
+        logging.warning(f"\n\nANOTHER EXCEPTION OCCURRED WHILE CONNECTING: {e}\n")
+
+    else:
+        if proxy_on or sys.argv[1] in ('--proxy', '-p'):
+            logging.warning("\nRUNNING VIA TOR/SOCKS5 PROXY!\n\n")
+
+
 if __name__ == "__main__":
     with open('files/token.txt') as f:
-        token = f.read()
+        token, sudo_pass = f.read().split(',')
+
+    proxy = {'ptb': None, 'owid': None}
+
+    if len(sys.argv) > 1:
+        if sys.argv[1] in ('--proxy', '-p'):
+            enable_proxy()
+
+    # Check if connection is working, if not, use proxy-
+    check_connection()
 
     pp = PicklePersistence(filename="files/user_data")
     updater = Updater(token=token, use_context=True, persistence=pp,
-                      request_kwargs={'proxy_url': 'http://95.174.67.50:18080/'})
+                      request_kwargs=proxy['ptb'])
     dp = updater.dispatcher
 
     for k, v in {'start': start, 'help': helper, 'world': world, 'uae': uae, 'stop': off_poll}.items():
@@ -126,7 +185,7 @@ if __name__ == "__main__":
 
     updater.job_queue.run_repeating(callback=new_cases_alert, interval=90, first=1)  # Run every 90 seconds
     updater.job_queue.run_repeating(callback=graphing.ui.utility.remove_all_user_data, interval=86400, first=2)
-    updater.job_queue.run_repeating(callback=load_data.download_file, interval=3600, first=3)  # Run every hour
+    updater.job_queue.run_repeating(callback=load_data.download_file, interval=3600, first=3, context=proxy)
     # updater.job_queue.run_repeating(callback=alert_ppl, interval=36000, first=3)  # Run every hour
 
     data_view()
