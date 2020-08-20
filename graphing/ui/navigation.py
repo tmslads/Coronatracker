@@ -49,6 +49,12 @@ def go_back_to_trend_buttons(update: Update, context: CallbackContext) -> None:
 def next_page(update: Update, context: CallbackContext) -> COUNTRY_SELECTOR:
     """Navigates the user to the next page in the country list."""
     context.user_data['current_page'] += 1
+
+    if context.user_data['current_page'] > 9:
+        context.user_data['current_page'] = 9
+        update.callback_query.answer()
+        return COUNTRY_SELECTOR
+
     make_country_list(update, context)
 
     return COUNTRY_SELECTOR
@@ -57,6 +63,12 @@ def next_page(update: Update, context: CallbackContext) -> COUNTRY_SELECTOR:
 def previous_page(update: Update, context: CallbackContext) -> COUNTRY_SELECTOR:
     """Navigates the user to the previous page in the country list."""
     context.user_data['current_page'] -= 1
+
+    if context.user_data['current_page'] < 1:
+        context.user_data['current_page'] = 1
+        update.callback_query.answer()
+        return COUNTRY_SELECTOR
+
     make_country_list(update, context)
 
     return COUNTRY_SELECTOR
