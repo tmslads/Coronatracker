@@ -70,6 +70,12 @@ def alert_ppl(context: CallbackContext) -> None:
     #         print(f"Exception for {_id}: {e}.")
 
 
+def disable_proxy(*args) -> None:
+    """Disables proxy after receiving a stop signal."""
+    command = f"echo '{sudo_pass}' | sudo -S systemctl stop tor; sudo systemctl disable tor"
+    subprocess.call(command, shell=True)
+
+
 def enable_proxy(recheck: bool = False) -> None:
     """
     Enable proxy by running a Linux command to setup a localhost TOR proxy server.
@@ -80,8 +86,9 @@ def enable_proxy(recheck: bool = False) -> None:
     global proxy
 
     logging.warning("\nATTEMPTING TO USE PROXY\n")
+    command = f"echo '{sudo_pass}' | sudo -S systemctl start tor; sudo systemctl enable tor"
+    subprocess.call(command, shell=True)
 
-    subprocess.Popen(['echo', f"'{sudo_pass}'", '|', 'sudo', '-S', 'systemctl', 'status', 'tor'])
     proxy = {'ptb': {'proxy_url': "socks5://127.0.0.1:9050"}, 'owid': {"https": 'socks5://127.0.0.1:9050'}}
 
     if recheck:
@@ -130,7 +137,7 @@ if __name__ == "__main__":
     check_connection()
 
     pp = PicklePersistence(filename="files/user_data")
-    updater = Updater(token=token, use_context=True, persistence=pp,
+    updater = Updater(token=token, use_context=True, persistence=pp, user_sig_handler=disable_proxy,
                       request_kwargs=proxy['ptb'])
     dp = updater.dispatcher
 
