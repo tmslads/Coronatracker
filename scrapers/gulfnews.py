@@ -16,7 +16,7 @@ class GulfNews(object):
 
         for breaking in latest_breaking:
             title = breaking.a.get_text().strip().replace('  ', ' ')
-            pattern1 = re.compile("\A(UAE|Coronavirus: UAE|COVID(-|\s)*19: UAE) (announces|reports|reported) (\d+) "
+            pattern1 = re.compile("\A(UAE|Coronavirus: UAE|COVID(-|\s)*19: UAE) (announces|reports|reported) ([0-9,]+) "
                                   "(new (coronavirus*) cases)*.*")
             pattern2 = re.compile("(\d+) new cases of COVID-19 (UAE)*")
             if re.search(pattern=pattern1, string=title) or re.search(pattern=pattern2, string=title):

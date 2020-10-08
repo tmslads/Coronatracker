@@ -9,7 +9,7 @@ URL = "https://www.worldometers.info/coronavirus/"
 class WorldMeter(object):
     def __init__(self, country=None):
         self.country = country
-        get = requests.get(URL)
+        get = requests.get(URL, timeout=7)
         self.soup = bs(get.content, features='html.parser')
 
     def latest_data(self) -> Tuple[str, str, str]:

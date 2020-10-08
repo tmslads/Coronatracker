@@ -7,9 +7,7 @@ from telegram.ext import CallbackContext
 from helpers.namer import get_chat_name
 from helpers.msg_deletor import del_msg
 from scrapers.worldometer import WorldMeter
-from graphing.ui.utility import remove_all_user_data
-
-logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(lineno)d - %(message)s', level=logging.INFO)
+from graphing.ui.utility import remove_user_data
 
 
 def helper(update: Update, context: CallbackContext) -> None:
@@ -38,7 +36,7 @@ def start(update: Update, context: CallbackContext) -> None:
     """Starts the bot for the user for the first time."""
     msg = "This bot gives you information related to the Novel Coronavirus (SARS-CoV-2) and the Coronavirus Disease " \
           "(COVID-19).\n\n Type /help " \
-          "to get a list of commands."
+          "to get a detailed list of commands. Some commands available are:\n /graphs, /uae, /world, /alerts."
 
     context.bot.send_message(chat_id=update.effective_chat.id, text=msg)
     logging.info(f"\n{update.effective_user.name} just used /start in {get_chat_name(update)}.\n\n")
@@ -122,6 +120,6 @@ def cancel(update: Update, context: CallbackContext) -> int:
                              reply_markup=ReplyKeyboardRemove(selective=True))
     logging.info(msg=f"\nThe user cancelled the request.\n\n")
 
-    remove_all_user_data(context)
+    remove_user_data(update, context)
 
     return -1

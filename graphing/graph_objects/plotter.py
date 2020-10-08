@@ -15,7 +15,7 @@ class Plotter(BaseGraph):
         y (list): The list of values to use for the y-axis in the graph.
         logscale (bool): Pass True, if the y-axis should be in log scale.
     """
-    fp = FontProperties(family='Product Sans', variant='small-caps', stretch=460, weight='demibold', size=11)
+    fp = FontProperties(family='Product Sans Medium', variant='small-caps', stretch=460, weight='demibold', size=11)
 
     def __init__(self, x: list, y: list, logscale: bool = False):
         super().__init__()
@@ -103,7 +103,7 @@ class Plotter(BaseGraph):
                          va='center', fontweight='bold', xy=(annotation.xy[0], annotation.xy[-1]),
                          xytext=((35 if is_pct else offset), 0), textcoords="offset points", annotation_clip=False,
                          path_effects=[patheffects.withSimplePatchShadow(shadow_rgbFace='#2C2C2C', alpha=0.2)],
-                         clip_on=False, wrap=True, fontfamily='Product Sans', color='#FFFFFF', fontsize=14)
+                         clip_on=False, wrap=True, fontfamily='Product Sans Medium', color='#FFFFFF', fontsize=14)
 
     def tick_config(self):
         """Configures the tick properties such as labels by applying the appropriate font and styles."""

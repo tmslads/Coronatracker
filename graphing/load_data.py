@@ -1,5 +1,6 @@
 import logging
 import sqlite3
+import os
 from datetime import datetime
 from typing import Union, Tuple, List
 
@@ -131,7 +132,7 @@ def download_file(context: CallbackContext):
     today = datetime.today()
     dl_today = context.bot_data['last_data_dl_date']
 
-    if (today - dl_today).seconds < 21600:  # Update if more than 6 hours have passed.
+    if (today - dl_today).seconds < 21600 and (today - dl_today).days < 1:  # Update if more than 6 hours have passed.
         logging.info("Not time for updates yet.")
         del today, dl_today
         return
@@ -158,5 +159,8 @@ def download_file(context: CallbackContext):
     logging.info("Converting to sqlite database...")
     DataHandler().convert_to_sql()
 
+    os.remove('graphing/owid-covid-data.csv')
+    logging.info("Deleted .csv file!")
+
     context.bot_data['last_data_dl_date'] = datetime.today()
-    logging.info("Last data get date updated!")
+    logging.info("Last data get date updated!\n")

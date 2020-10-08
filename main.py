@@ -3,12 +3,14 @@ import sys
 import pickle
 import pprint
 import subprocess
+from socket import timeout
 
 import requests
 from requests.exceptions import ReadTimeout
 from telegram import Update
 from telegram.ext import (Updater, CommandHandler, PicklePersistence, CallbackQueryHandler, CallbackContext,
                           MessageHandler, Filters, ConversationHandler)
+from telegram.vendor.ptb_urllib3.urllib3.contrib.socks import ConnectTimeoutError
 
 import graphing.ui.utility
 from bot_funcs.commands import start, world, uae, helper, ask_feedback, receive_feedback, cancel
@@ -16,7 +18,23 @@ from bot_funcs.alert import new_cases_alert, opt_in_out, update_alert
 from graphing.ui import datas, entry, navigation, country_maker, trends_ui
 from graphing import load_data
 
-logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(lineno)d - %(message)s', level=logging.INFO)
+logging.getLogger('apscheduler').setLevel(logging.WARNING)
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
+
+fh = logging.FileHandler('files/logs.log')
+fh.setLevel(logging.INFO)
+
+ch = logging.StreamHandler()
+ch.setLevel(logging.INFO)
+
+formatter = logging.Formatter('%(asctime)s - %(filename)s - %(levelname)s - %(lineno)d - %(message)s')
+
+fh.setFormatter(formatter)
+ch.setFormatter(formatter)
+
+logger.addHandler(fh)
+logger.addHandler(ch)
 
 
 def data_view() -> None:
@@ -30,16 +48,16 @@ def msgs(update: Update, context: CallbackContext):
         context.bot.send_message(chat_id=update.effective_chat.id, text="There is already a /graphs instance in use!",
                                  reply_to_message_id=update.effective_message.message_id)
 
-        logging.info(f"{update.effective_user.name} used /graphs before timeout.\n\n")
+        logger.info(f"{update.effective_user.name} used /graphs before timeout.\n\n")
         return
 
     elif msg == "/cancel":
         context.bot.send_message(chat_id=update.effective_chat.id, text="There is... nothing to cancel.",
                                  reply_to_message_id=update.effective_message.message_id)
-        logging.info(f"{update.effective_user.name} used /cancel for no reason.\n\n")
+        logger.info(f"{update.effective_user.name} used /cancel for no reason.\n\n")
         return
 
-    logging.info(f"{update.effective_user.name} said {msg}.")
+    logger.info(f"{update.effective_user.name} said {msg}.")
 
 
 def off_poll(update: Update, context: CallbackContext) -> None:
@@ -52,7 +70,7 @@ def alert_ppl(context: CallbackContext) -> None:
     # ids = context.dispatcher.user_data.keys()
     # print(ids)
     context.bot.send_message(chat_id=764886971,
-                             text="We all come from @BotFather. He is supreme. He will help us triumph against you.")
+                             text="no")
     print('sent')
     # for _id in ids:
     #     try:
@@ -63,17 +81,20 @@ def alert_ppl(context: CallbackContext) -> None:
     #                                       "You can now also use /feedback to give any feedback\! It goes directly to "
     #                                       "the bot creator\.",
     #                                  parse_mode="MarkdownV2")
-    #         logging.info(f"\nAlert sent to: {_id=}, Title: {user.title}, Username:{user.username}, "
+    #         logger.info(f"\nAlert sent to: {_id=}, Title: {user.title}, Username:{user.username}, "
     #                      f"Name: {user.first_name}\n\n")
     #
     #     except Exception as e:
     #         print(f"Exception for {_id}: {e}.")
 
 
-def disable_proxy(*args) -> None:
+def disable_proxy() -> None:
     """Disables proxy after receiving a stop signal."""
-    command = f"echo '{sudo_pass}' | sudo -S systemctl stop tor; sudo systemctl disable tor"
-    subprocess.call(command, shell=True)
+    if proxy['ptb'] is not None:
+        command = f"echo '{sudo_pass}' | sudo -S systemctl stop tor; sudo systemctl disable tor"
+        subprocess.call(command, shell=True)
+        logger.warning("PROXY STOPPED")
+    logger.info("------ STOP ------")
 
 
 def enable_proxy(recheck: bool = False) -> None:
@@ -85,7 +106,7 @@ def enable_proxy(recheck: bool = False) -> None:
     """
     global proxy
 
-    logging.warning("\nATTEMPTING TO USE PROXY\n")
+    logger.warning("\nATTEMPTING TO USE PROXY\n")
     command = f"echo '{sudo_pass}' | sudo -S systemctl start tor; sudo systemctl enable tor"
     subprocess.call(command, shell=True)
 
@@ -109,18 +130,18 @@ def check_connection(proxy_on: bool = False):
 
     except ReadTimeout:
         if proxy_on:
-            logging.critical("\n\n\nFAILED TO CONNECT VIA PROXY, CHECK YOUR INTERNET CONNECTION!\n")
+            logger.critical("\n\n\nFAILED TO CONNECT VIA PROXY, CHECK YOUR INTERNET CONNECTION!\n")
             raise SystemExit
         else:
-            logging.warning("\nFAILED TO ESTABLISH CONNECTION.\n\n")
+            logger.warning("\nFAILED TO ESTABLISH CONNECTION.\n\n")
             enable_proxy(recheck=True)
 
     except Exception as e:
-        logging.warning(f"\n\nANOTHER EXCEPTION OCCURRED WHILE CONNECTING: {e}\n")
+        logger.warning(f"\n\nANOTHER EXCEPTION OCCURRED WHILE CONNECTING: {e}\n")
 
     else:
-        if proxy_on or sys.argv[1] in ('--proxy', '-p'):
-            logging.warning("\nRUNNING VIA TOR/SOCKS5 PROXY!\n\n")
+        if proxy_on or sys.argv[-1] in ('--proxy', '-p'):
+            logger.warning("\nRUNNING VIA TOR/SOCKS5 PROXY!\n\n")
 
 
 if __name__ == "__main__":
@@ -137,9 +158,11 @@ if __name__ == "__main__":
     check_connection()
 
     pp = PicklePersistence(filename="files/user_data")
-    updater = Updater(token=token, use_context=True, persistence=pp, user_sig_handler=disable_proxy,
+    updater = Updater(token=token, persistence=pp, user_sig_handler=disable_proxy,
                       request_kwargs=proxy['ptb'])
     dp = updater.dispatcher
+
+    # if 'last_log_delete' not in pp.get_bot_data():
 
     for k, v in {'start': start, 'help': helper, 'world': world, 'uae': uae, 'stop': off_poll}.items():
         dp.add_handler(CommandHandler(command=k, callback=v))
@@ -197,5 +220,8 @@ if __name__ == "__main__":
 
     data_view()
 
-    updater.start_polling()
+    try:
+        updater.start_polling(timeout=15, read_latency=5.0)
+    except (timeout, ConnectTimeoutError):
+        pass
     updater.idle()

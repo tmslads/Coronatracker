@@ -9,10 +9,9 @@ from helpers.db_connector import connection
 from helpers.namer import get_chat_name
 from scrapers.gulfnews import GulfNews
 
-logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(lineno)d - %(message)s', level=logging.INFO)
 
 text = "This bot can also send you breaking COVID-19 news for the UAE such as new cases, " \
-       "deaths, etc. when they come in (usually once a day).\n\n" \
+       "deaths, etc. when they come in (usually once a day between 2PM - 8PM UAE time).\n\n" \
        "Do you wish to opt in to receive such news?\n\n" \
        "Current status is: ()"
 
@@ -52,14 +51,17 @@ def new_cases_alert(context: CallbackContext) -> None:
 
         try:
             if today.month > alert_today.month or today.day > alert_today.day:  # Check if new day has passed
-                msg = context.bot.send_message(chat_id=chat_id, text=f"UPDATE:\n\n{breaking_url}")
+                msg = context.bot.send_message(chat_id=chat_id, text=f"UPDATE: {today.strftime('%d/%m/%Y')}\n\n"
+                                                                     f"{breaking_url}")
                 logging.info(f"\nThe breaking news was just sent to: {chat_name}.\n\n")
 
                 msg_query = f"UPDATE CHAT_SETTINGS SET MSG_ID={msg.message_id} WHERE CHAT_ID={chat_id};"
                 connection(msg_query, table_update=True)  # Add/Update message id to db so we can update later
 
             else:
-                context.bot.edit_message_text(chat_id=chat_id, message_id=msg_id, text=f"UPDATE:\n\n{breaking_url}")
+                context.bot.edit_message_text(chat_id=chat_id, message_id=msg_id,
+                                              text=f"UPDATE: {today.strftime('%d/%m/%Y')}\n\n"
+                                                   f"{breaking_url}")
                 logging.info(f"\nThe breaking news msg was updated for: {chat_name}.\n\n")
 
         except error.Unauthorized:
