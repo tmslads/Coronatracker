@@ -45,7 +45,8 @@ def data_view() -> None:
 def msgs(update: Update, context: CallbackContext):
     msg = update.message.text
     if msg == "/graphs" or msg == "/graphs@uaecoronabot":
-        context.bot.send_message(chat_id=update.effective_chat.id, text="There is already a /graphs instance in use!",
+        context.bot.send_message(chat_id=update.effective_chat.id, text="There is already a /graphs instance in use!"
+                                                                        "\n\nUse /cancel to cancel.",
                                  reply_to_message_id=update.effective_message.message_id)
 
         logger.info(f"{update.effective_user.name} used /graphs before timeout.\n\n")
@@ -62,8 +63,8 @@ def msgs(update: Update, context: CallbackContext):
 
 def off_poll(update: Update, context: CallbackContext) -> None:
     if update.effective_user.id == 476269395:
+        context.bot.send_message(chat_id=476269395, text='stopping...')
         updater.stop()
-        context.bot.send_message(chat_id=476269395, text='stopped.')
 
 
 def alert_ppl(context: CallbackContext) -> None:
@@ -88,7 +89,7 @@ def alert_ppl(context: CallbackContext) -> None:
     #         print(f"Exception for {_id}: {e}.")
 
 
-def disable_proxy() -> None:
+def disable_proxy(*args) -> None:
     """Disables proxy after receiving a stop signal."""
     if proxy['ptb'] is not None:
         command = f"echo '{sudo_pass}' | sudo -S systemctl stop tor; sudo systemctl disable tor"
