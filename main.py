@@ -2,7 +2,7 @@ import logging
 import sys
 import pickle
 import pprint
-import subprocess
+# import subprocess
 from socket import timeout
 from os import environ
 
@@ -92,10 +92,10 @@ def alert_ppl(context: CallbackContext) -> None:
 
 def disable_proxy(*args) -> None:
     """Disables proxy after receiving a stop signal."""
-    if proxy['ptb'] is not None:
-        command = f"echo '{sudo_pass}' | sudo -S systemctl stop tor; sudo systemctl disable tor"
-        subprocess.call(command, shell=True)
-        logger.warning("PROXY STOPPED")
+    # if proxy['ptb'] is not None:
+    #     command = f"echo '{sudo_pass}' | sudo -S systemctl stop tor; sudo systemctl disable tor"
+    #     subprocess.call(command, shell=True)
+    #     logger.warning("PROXY STOPPED")
     logger.info("------ STOP ------")
 
 
@@ -109,8 +109,8 @@ def enable_proxy(recheck: bool = False) -> None:
     global proxy
 
     logger.warning("\nATTEMPTING TO USE PROXY\n")
-    command = f"echo '{sudo_pass}' | sudo -S systemctl start tor; sudo systemctl enable tor"
-    subprocess.call(command, shell=True)
+    # command = f"echo '{sudo_pass}' | sudo -S systemctl start tor; sudo systemctl enable tor"
+    # subprocess.call(command, shell=True)
 
     proxy = {'ptb': {'proxy_url': "socks5://127.0.0.1:9050"}, 'owid': {"https": 'socks5://127.0.0.1:9050'}}
 
@@ -146,10 +146,11 @@ def check_connection(proxy_on: bool = False):
             logger.warning("\nRUNNING VIA TOR/SOCKS5 PROXY!\n\n")
 
 
-with open('files/token.txt') as f:
-    token, sudo_pass = f.read().split(',')
+# with open('files/token.txt') as f:
+#     token, sudo_pass = f.read().split(',')
 
 proxy = {'ptb': None, 'owid': None}
+token = environ.get('token')
 
 if len(sys.argv) > 1:
     if sys.argv[1] in ('--proxy', '-p'):
@@ -223,8 +224,8 @@ data_view()
 
 try:
     # updater.start_polling(timeout=15, read_latency=5.0)
-    updater.start_webhook(listen="0.0.0.0",  port=int(environ.get('PORT', 8443)), url_path=environ.get('token'))
-    updater.bot.setWebhook(f"https://coronatrackerbot.herokuapp.com/{environ.get('token')}")
+    updater.start_webhook(listen="0.0.0.0", port=int(environ.get('PORT', 8443)), url_path=token)
+    updater.bot.setWebhook(f"https://coronatrackerbot.herokuapp.com/{token}")
 except (timeout, ConnectTimeoutError):
     pass
 updater.idle()
