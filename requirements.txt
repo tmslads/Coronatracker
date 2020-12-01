@@ -1,5 +1,6 @@
 # Python telegram bot-
 python-telegram-bot>=13.1
+python-telegram-bot[socks]
 
 # Graphing/data science library-
 matplotlib~=3.3.0
