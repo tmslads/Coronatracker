@@ -51,9 +51,7 @@ def next_page(update: Update, context: CallbackContext) -> COUNTRY_SELECTOR:
     context.user_data['current_page'] += 1
 
     if context.user_data['current_page'] > 9:
-        context.user_data['current_page'] = 9
-        update.callback_query.answer()
-        return COUNTRY_SELECTOR
+        context.user_data['current_page'] = 1
 
     make_country_list(update, context)
 
@@ -65,9 +63,7 @@ def previous_page(update: Update, context: CallbackContext) -> COUNTRY_SELECTOR:
     context.user_data['current_page'] -= 1
 
     if context.user_data['current_page'] < 1:
-        context.user_data['current_page'] = 1
-        update.callback_query.answer()
-        return COUNTRY_SELECTOR
+        context.user_data['current_page'] = 9
 
     make_country_list(update, context)
 

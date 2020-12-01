@@ -4,6 +4,7 @@ import pickle
 import pprint
 import subprocess
 from socket import timeout
+from os import environ
 
 import requests
 from requests.exceptions import ReadTimeout
@@ -222,7 +223,9 @@ if __name__ == "__main__":
     data_view()
 
     try:
-        updater.start_polling(timeout=15, read_latency=5.0)
+        # updater.start_polling(timeout=15, read_latency=5.0)
+        updater.start_webhook(listen="0.0.0.0",  port=int(environ.get('PORT', 5000)), url_path=token)
+        updater.bot.setWebhook('https://coronatrackerbot.herokuapp.com/' + token)
     except (timeout, ConnectTimeoutError):
         pass
     updater.idle()

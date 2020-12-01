@@ -17,18 +17,12 @@ def make_country_list(update: Update, context: CallbackContext) -> COUNTRY_SELEC
     page = context.user_data['current_page']
     country_list = context.user_data['country_list']
 
-    country_page = country_list[page - 1].copy()  # Make deep copy of list to prevent errors
+    country_page = country_list[page - 1].copy()  # Make deep copy of list to prevent errors. '-1' for indexing purposes
 
     logging.info(msg=f"{update.callback_query.from_user.name} is on page {page}.")
 
-    if page == 1:
-        country_page.insert(0, [InlineKeyboardButton(text="Next Page >", callback_data="next_page")])
-    elif 1 < page < 9:
-        country_page.insert(0, [InlineKeyboardButton(text="< Previous Page", callback_data="previous_page"),
-                                InlineKeyboardButton(text="Next Page >", callback_data="next_page")])
-
-    else:
-        country_page.insert(0, [InlineKeyboardButton(text="< Previous Page", callback_data="previous_page")])
+    country_page.insert(0, [InlineKeyboardButton(text="< Previous Page", callback_data="previous_page"),
+                            InlineKeyboardButton(text="Next Page >", callback_data="next_page")])
 
     country_page.insert(0, [InlineKeyboardButton(text="<< Main menu", callback_data="back_main")])
 
