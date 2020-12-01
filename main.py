@@ -146,86 +146,85 @@ def check_connection(proxy_on: bool = False):
             logger.warning("\nRUNNING VIA TOR/SOCKS5 PROXY!\n\n")
 
 
-if __name__ == "__main__":
-    with open('files/token.txt') as f:
-        token, sudo_pass = f.read().split(',')
+with open('files/token.txt') as f:
+    token, sudo_pass = f.read().split(',')
 
-    proxy = {'ptb': None, 'owid': None}
+proxy = {'ptb': None, 'owid': None}
 
-    if len(sys.argv) > 1:
-        if sys.argv[1] in ('--proxy', '-p'):
-            enable_proxy()
+if len(sys.argv) > 1:
+    if sys.argv[1] in ('--proxy', '-p'):
+        enable_proxy()
 
-    # Check if connection is working, if not, use proxy-
-    check_connection()
+# Check if connection is working, if not, use proxy-
+check_connection()
 
-    pp = PicklePersistence(filename="files/user_data")
-    updater = Updater(token=token, persistence=pp, user_sig_handler=disable_proxy,
-                      request_kwargs=proxy['ptb'])
-    dp = updater.dispatcher
+pp = PicklePersistence(filename="files/user_data")
+updater = Updater(token=token, persistence=pp, user_sig_handler=disable_proxy,
+                  request_kwargs=proxy['ptb'])
+dp = updater.dispatcher
 
-    # if 'last_log_delete' not in pp.get_bot_data():
+# if 'last_log_delete' not in pp.get_bot_data():
 
-    for k, v in {'start': start, 'help': helper, 'world': world, 'uae': uae, 'stop': off_poll}.items():
-        dp.add_handler(CommandHandler(command=k, callback=v))
+for k, v in {'start': start, 'help': helper, 'world': world, 'uae': uae, 'stop': off_poll}.items():
+    dp.add_handler(CommandHandler(command=k, callback=v))
 
-    dp.add_handler(CommandHandler(command='alerts', callback=opt_in_out))
+dp.add_handler(CommandHandler(command='alerts', callback=opt_in_out))
 
-    # For feedback-
-    dp.add_handler(ConversationHandler(
-        entry_points=[CommandHandler(command='feedback', callback=ask_feedback)],
-        states={1: [MessageHandler(filters=Filters.text & ~ Filters.command, callback=receive_feedback)]},
-        fallbacks=[CommandHandler(command='cancel', callback=cancel)]))
+# For feedback-
+dp.add_handler(ConversationHandler(
+    entry_points=[CommandHandler(command='feedback', callback=ask_feedback)],
+    states={1: [MessageHandler(filters=Filters.text & ~ Filters.command, callback=receive_feedback)]},
+    fallbacks=[CommandHandler(command='cancel', callback=cancel)]))
 
-    # For toggling alerts-
-    dp.add_handler(CallbackQueryHandler(callback=update_alert, pattern="toggle"))
+# For toggling alerts-
+dp.add_handler(CallbackQueryHandler(callback=update_alert, pattern="toggle"))
 
-    # For graphs-
-    dp.add_handler(ConversationHandler(
-        entry_points=[CommandHandler(command="graphs", callback=entry.call_graph_command)],
+# For graphs-
+dp.add_handler(ConversationHandler(
+    entry_points=[CommandHandler(command="graphs", callback=entry.call_graph_command)],
 
-        states={
-            datas.MAIN_SELECTOR: [CallbackQueryHandler(callback=entry.show_trend_buttons, pattern="OWID_WRL"),
-                                  CallbackQueryHandler(callback=country_maker.make_country_list, pattern="country")],
+    states={
+        datas.MAIN_SELECTOR: [CallbackQueryHandler(callback=entry.show_trend_buttons, pattern="OWID_WRL"),
+                              CallbackQueryHandler(callback=country_maker.make_country_list, pattern="country")],
 
-            datas.COUNTRY_SELECTOR: [CallbackQueryHandler(callback=navigation.go_back_to_main, pattern="back_main"),
-                                     CallbackQueryHandler(callback=navigation.previous_page, pattern="previous_page"),
-                                     CallbackQueryHandler(callback=navigation.next_page, pattern="next_page"),
-                                     CallbackQueryHandler(callback=entry.show_trend_buttons,
-                                                          pattern="|".join(datas.iso_codes))],
+        datas.COUNTRY_SELECTOR: [CallbackQueryHandler(callback=navigation.go_back_to_main, pattern="back_main"),
+                                 CallbackQueryHandler(callback=navigation.previous_page, pattern="previous_page"),
+                                 CallbackQueryHandler(callback=navigation.next_page, pattern="next_page"),
+                                 CallbackQueryHandler(callback=entry.show_trend_buttons,
+                                                      pattern="|".join(datas.iso_codes))],
 
-            datas.TREND_SELECTOR: [CallbackQueryHandler(callback=navigation.go_back_to_main, pattern="back_main"),
-                                   CallbackQueryHandler(callback=navigation.go_back_to_countries,
-                                                        pattern="back_countries"),
-                                   CallbackQueryHandler(callback=trends_ui.chosen_trend,
-                                                        pattern="total_cases|new_cases|total_deaths|new_deaths|"
-                                                                "total_tests|new_tests|positivity_rate")],
+        datas.TREND_SELECTOR: [CallbackQueryHandler(callback=navigation.go_back_to_main, pattern="back_main"),
+                               CallbackQueryHandler(callback=navigation.go_back_to_countries,
+                                                    pattern="back_countries"),
+                               CallbackQueryHandler(callback=trends_ui.chosen_trend,
+                                                    pattern="total_cases|new_cases|total_deaths|new_deaths|"
+                                                            "total_tests|new_tests|positivity_rate")],
 
-            datas.GRAPH_OPTIONS: [CallbackQueryHandler(callback=navigation.go_back_to_trend_buttons,
-                                                       pattern="back_trends"),
-                                  CallbackQueryHandler(callback=trends_ui.toggle_log, pattern="log")],
+        datas.GRAPH_OPTIONS: [CallbackQueryHandler(callback=navigation.go_back_to_trend_buttons,
+                                                   pattern="back_trends"),
+                              CallbackQueryHandler(callback=trends_ui.toggle_log, pattern="log")],
 
-            ConversationHandler.TIMEOUT: [MessageHandler(callback=graphing.ui.utility.remove_user_data,
-                                                         filters=Filters.all),
-                                          CallbackQueryHandler(callback=graphing.ui.utility.remove_user_data)]
+        ConversationHandler.TIMEOUT: [MessageHandler(callback=graphing.ui.utility.remove_user_data,
+                                                     filters=Filters.all),
+                                      CallbackQueryHandler(callback=graphing.ui.utility.remove_user_data)]
 
-        },
-        fallbacks=[CommandHandler(command='cancel', callback=cancel)], conversation_timeout=300))  # 5 min timeout
+    },
+    fallbacks=[CommandHandler(command='cancel', callback=cancel)], conversation_timeout=300))  # 5 min timeout
 
-    # Random text to bot-
-    dp.add_handler(MessageHandler(filters=Filters.text, callback=msgs))
+# Random text to bot-
+dp.add_handler(MessageHandler(filters=Filters.text, callback=msgs))
 
-    updater.job_queue.run_repeating(callback=new_cases_alert, interval=90, first=1)  # Run every 90 seconds
-    updater.job_queue.run_repeating(callback=graphing.ui.utility.remove_all_user_data, interval=86400, first=2)
-    updater.job_queue.run_repeating(callback=load_data.download_file, interval=3600, first=3, context=proxy)
-    # updater.job_queue.run_repeating(callback=alert_ppl, interval=36000, first=3)  # Run every hour
+updater.job_queue.run_repeating(callback=new_cases_alert, interval=90, first=1)  # Run every 90 seconds
+updater.job_queue.run_repeating(callback=graphing.ui.utility.remove_all_user_data, interval=86400, first=2)
+updater.job_queue.run_repeating(callback=load_data.download_file, interval=3600, first=3, context=proxy)
+# updater.job_queue.run_repeating(callback=alert_ppl, interval=36000, first=3)  # Run every hour
 
-    data_view()
+data_view()
 
-    try:
-        # updater.start_polling(timeout=15, read_latency=5.0)
-        updater.start_webhook(listen="0.0.0.0",  port=int(environ.get('PORT', 5000)), url_path=token)
-        updater.bot.setWebhook('https://coronatrackerbot.herokuapp.com/' + token)
-    except (timeout, ConnectTimeoutError):
-        pass
-    updater.idle()
+try:
+    # updater.start_polling(timeout=15, read_latency=5.0)
+    updater.start_webhook(listen="0.0.0.0",  port=int(environ.get('PORT', 8443)), url_path=environ.get('token'))
+    updater.bot.setWebhook(f"https://coronatrackerbot.herokuapp.com/{environ.get('token')}")
+except (timeout, ConnectTimeoutError):
+    pass
+updater.idle()
