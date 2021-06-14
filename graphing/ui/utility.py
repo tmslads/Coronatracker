@@ -60,8 +60,8 @@ def del_pic_local(context: CallbackContext, all: bool = False) -> None:
     """
     try:
         if all:
-            for fname in os.listdir("graphing"):
-                if fname.endswith('.png'):
+            for fname in os.listdir("graphing/"):
+                if fname.endswith('png'):
                     os.remove(fname)
             return
         os.remove(path=f"graphing/{context.user_data['covid_trend_pic']}.png")
