@@ -1,11 +1,14 @@
+import html
+import json
 import logging
 import os
 import pickle
 import pprint
 import threading
 import time
+import traceback
 
-from telegram import Update
+from telegram import Update, ParseMode
 from telegram.ext import (Updater, CommandHandler, PicklePersistence, CallbackQueryHandler, CallbackContext,
                           MessageHandler, Filters, ConversationHandler, ChatMemberHandler)
 from flask import Flask
@@ -68,6 +71,29 @@ def off_poll(update: Update, context: CallbackContext) -> None:
     if update.effective_user.id == 476269395:
         context.bot.send_message(chat_id=476269395, text='stopping...')
         updater.stop()
+
+
+def errors(update: object, context: CallbackContext) -> None:
+    """Log the error and send a telegram message to notify the developer."""
+    logger.error(msg="Exception while handling an update:", exc_info=context.error)
+
+    tb_list = traceback.format_exception(None, context.error, context.error.__traceback__)
+    tb_string = ''.join(tb_list)
+
+    # Build the message with some markup and additional information about what happened.
+    # You might need to add some logic to deal with messages longer than the 4096 character limit.
+    update_str = update.to_dict() if isinstance(update, Update) else str(update)
+    message = (
+        f'An exception was raised while handling an update\n'
+        f'<pre>update = {html.escape(json.dumps(update_str, indent=2, ensure_ascii=False))}'
+        '</pre>\n\n'
+        f'<pre>context.chat_data = {html.escape(str(context.chat_data))}</pre>\n\n'
+        f'<pre>context.user_data = {html.escape(str(context.user_data))}</pre>\n\n'
+        f'<pre>{html.escape(tb_string)}</pre>'
+    )
+
+    # Finally, send the message
+    context.bot.send_message(chat_id=476269395, text=message, parse_mode=ParseMode.HTML)
 
 
 # def alert_ppl(context: CallbackContext) -> None:
@@ -144,6 +170,7 @@ dp.add_handler(ConversationHandler(
 # Random text to bot-
 dp.add_handler(MessageHandler(filters=Filters.text & Filters.chat_type.private, callback=msgs))
 dp.add_handler(ChatMemberHandler(user_blocked))
+dp.add_error_handler(errors)
 
 updater.job_queue.run_repeating(callback=new_cases_alert, interval=90, first=1)  # Run every 90 seconds
 updater.job_queue.run_repeating(callback=graphing.ui.utility.remove_all_user_data, interval=86400, first=2)
