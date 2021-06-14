@@ -74,16 +74,16 @@ class BaseGraph:
             _type (str): Title of the figure.
             country (str): Title of the axis.
         """
-        fp = FontProperties(family='Product Sans Bold', variant='small-caps', stretch=420, weight='extra bold',
-                            size=20)
+        fp = FontProperties(fname='graphing/mpl_fonts/Product_Sans_Bold.ttf', variant='small-caps', stretch=420,
+                            weight='extra bold', size=20)
 
         self.canvas.suptitle(t=f"{_type}", fontproperties=fp, color="#F9C027", ha='center', x=0.51,
                              path_effects=[patheffects.withSimplePatchShadow(shadow_rgbFace='#2C2C2C', alpha=0.7)],
                              clip_on=False, wrap=True)
 
         self.ax.set_title(label=f"{country}",
-                          fontdict={'fontname': 'Product Sans Bold', 'size': 21, 'weight': 'semibold',
-                                    'color': '#EEEEEE'},
+                          fontdict={'fontname': 'graphing/mpl_fonts/Product_Sans_Bold.ttf', 'size': 21,
+                                    'weight': 'semibold', 'color': '#EEEEEE'},
                           loc='center', pad=6.0,
                           path_effects=[patheffects.withSimplePatchShadow(shadow_rgbFace='#2C2C2C', alpha=0.55)],
                           clip_on=False, wrap=True)
@@ -91,13 +91,14 @@ class BaseGraph:
     def enable_legend(self) -> None:
         """Enable the legend for the graph, with appropriate font properties and styling."""
         legend = self.ax.legend(
-            prop=FontProperties(family='Product Sans Regular', variant='normal', stretch="semi-condensed",
+            prop=FontProperties(fname='graphing/mpl_fonts/Product_Sans_Regular.ttf', variant='normal',
+                                stretch="semi-condensed",
                                 weight='book',
                                 size=10), shadow=True, numpoints=2, markerscale=0.8, edgecolor='white')
 
         legend.set_title(title="LEGEND",
-                         prop=FontProperties(family="Product Sans Medium", weight="semibold", size=12,
-                                             stretch="normal"))
+                         prop=FontProperties(fname='graphing/mpl_fonts/Product_Sans_Bold.ttf', weight="semibold",
+                                             size=12, stretch="normal"))
 
     def save_graph(self, path: str, color: str, **kwargs) -> None:
         """

@@ -91,7 +91,8 @@ def errors(update: object, context: CallbackContext) -> None:
     if isinstance(update, Update) and update.effective_message:
         if len(message) > 4096:
             message = message[-4095:]
-        update.effective_message.reply_text('An error occurred. The error has been forwarded to the bot developer (@Hoppingturtles)')
+        update.effective_message.reply_text('An error occurred. The error has been forwarded to the bot developer '
+                                            '(@Hoppingturtles)')
     # Finally, send the message
     context.bot.send_message(chat_id=476269395, text=message, parse_mode=ParseMode.HTML)
 
