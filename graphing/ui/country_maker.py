@@ -27,7 +27,7 @@ def make_country_list(update: Update, context: CallbackContext) -> COUNTRY_SELEC
     country_page.insert(0, [InlineKeyboardButton(text="<< Main menu", callback_data="back_main")])
 
     update.callback_query.answer()
-    update.callback_query.edit_message_text(text=country_msg.replace('()', str(page)), parse_mode="MarkdownV2",
-                                            reply_markup=InlineKeyboardMarkup(country_page))
-
+    msg = update.callback_query.edit_message_text(text=country_msg.replace('()', str(page)), parse_mode="MarkdownV2",
+                                                  reply_markup=InlineKeyboardMarkup(country_page))
+    context.user_data['graph_id'] = msg.message_id
     return COUNTRY_SELECTOR

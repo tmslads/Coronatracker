@@ -10,7 +10,7 @@ from scrapers.worldometer import WorldMeter
 from graphing.ui.utility import remove_user_data
 
 
-def helper(update: Update, context: CallbackContext) -> None:
+def helper(update: Update, _: CallbackContext) -> None:
     """Sends a help message to the user explaining available bot commands."""
     msg = "This bot gives you up to date information about the coronavirus\. Here are the commands" \
           " supported:\n\n" \
@@ -27,8 +27,7 @@ def helper(update: Update, context: CallbackContext) -> None:
           "You can find the source code of this project [here](https://github.com/tmslads/Coronatracker)\.\n\n" \
           "This bot is actively maintained by: @Hoppingturtles"
 
-    context.bot.send_message(chat_id=update.effective_chat.id, text=msg, parse_mode="MarkdownV2",
-                             disable_web_page_preview=True)
+    update.message.reply_markdown_v2(text=msg, disable_web_page_preview=True)
     logging.info(f"\n{update.effective_user.name} just used /help in {get_chat_name(update)}.\n\n")
 
 
@@ -68,11 +67,9 @@ def uae(update: Update, context: CallbackContext) -> None:
     logging.info(f"\n{update.effective_user.name} just used /uae in {get_chat_name(update)}.\n\n")
 
 
-def world(update: Update, context: CallbackContext) -> None:
+def world(update: Update, _: CallbackContext) -> None:
     """Sends the user worldwide coronavirus statistics."""
-    chat_id = update.effective_chat.id
-
-    context.bot.send_chat_action(chat_id=chat_id, action='typing')
+    update.message.reply_chat_action(action='typing')
     init = WorldMeter()
     total, dead, recovered = init.latest_data()
     msg = f"Latest coronavirus stats across the globe:\n\n" \
@@ -81,45 +78,55 @@ def world(update: Update, context: CallbackContext) -> None:
           f"🩹 Recoveries: {recovered}`\n\n" \
           f"_Last updated on {datetime.now(timezone.utc).strftime('%B %d, %Y at %H:%M:%S')} UTC_"
 
-    context.bot.send_message(chat_id=chat_id, text=msg, parse_mode='MarkdownV2')
+    update.message.reply_markdown_v2(text=msg)
     logging.info(f"\n{update.effective_user.name} just used /world in {get_chat_name(update)}.\n\n")
 
 
-def ask_feedback(update: Update, context: CallbackContext) -> int:
+def ask_feedback(update: Update, _: CallbackContext) -> int:
     """Sends a message to the user asking for feedback. Called when user clicks /feedback."""
     logging.info(msg=f"\n{update.effective_user.name} just used /feedback in {get_chat_name(update)}\n\n")
 
-    context.bot.send_message(chat_id=update.effective_chat.id,
-                             text="What would you like suggest? You can submit a bug report, feature request, "
-                                  "anything!\nMake sure to read /help before submitting.\n\nType /cancel to cancel.",
-                             reply_markup=ForceReply(selective=True))
+    update.message.reply_text(text="What would you like suggest? You can submit a bug report, feature request, "
+                                   "anything!\nMake sure to read /help before submitting.\n\nType /cancel to cancel.",
+                              reply_markup=ForceReply(selective=True))
 
     return 1
 
 
 def receive_feedback(update: Update, context: CallbackContext) -> int:
-    """Get feedback from user, display in console and save to file."""
-    with open("files/feedback.txt", 'a') as f:
-        feedback = f"{update.effective_user.name} suggested: {update.message.text}\n\n"
-        f.write(feedback)
-
+    """Get feedback from user, display in console and send to bot developer."""
+    feedback = f"Feedback received from {update.effective_user.name}:\n\n{update.message.text}"
     logging.info(msg=f'\n{feedback}')
 
-    context.bot.send_message(chat_id=update.effective_chat.id, text="Thank you for your feedback!")
+    update.message.reply_text(text="Thank you for your feedback!")
+    context.bot.send_message(chat_id=476269395, text=feedback)
+
     return -1
+
+
+def vaccine(update: Update, _: CallbackContext) -> None:
+    """Sends vaccine information for the users in UAE."""
+    vaccine_msg = "The UAE is now offering *free* vaccinations to people\. \n\n" \
+                  "• Anyone from age 12 onwards can walk in and get vaccinated with a vaccine of their choice\.\n\n" \
+                  "*Where are the vaccination centres?* \n\n" \
+                  "Call DHA \(800342\) _or_ download their app " \
+                  "\([Android](https://play.google.com/store/apps/details?id=ae.gov.dha.flagship&hl=en&gl=US)\)" \
+                  "\([iOS](https://apps.apple.com/ae/app/dha-%D9%87%D9%8A%D8%A6%D8%A9-%D8%A7%D9%84%D8%B5%D8%AD%D8%A9" \
+                  "-%D8%A8%D8%AF%D8%A8%D9%8A/id1437186269)\) & book a COVID\-19 vaccination appointment\.\n\n" \
+
+    update.message.reply_markdown_v2(text=vaccine_msg, disable_web_page_preview=True)
+    logging.info(msg=f'\n{update.effective_user.name} just used /vaccine in {get_chat_name(update)}.\n\n')
 
 
 def cancel(update: Update, context: CallbackContext) -> int:
     """Cancels the current operation."""
+    logging.info(msg=f"\nThe user cancelled the request.\n\n")
     try:
+        remove_user_data(update, context)
         del_msg(update, context, msg_no=-1)
     except Exception as e:
-        print(e)
+        logging.exception(e)
 
-    context.bot.send_message(chat_id=update.effective_chat.id, text="The command was cancelled.",
-                             reply_markup=ReplyKeyboardRemove(selective=True))
-    logging.info(msg=f"\nThe user cancelled the request.\n\n")
-
-    remove_user_data(update, context)
+    update.message.reply_text(text="The command was cancelled.", reply_markup=ReplyKeyboardRemove(selective=True))
 
     return -1

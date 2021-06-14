@@ -122,9 +122,6 @@ class DataHandler:
 def download_file(context: CallbackContext):
     """
     Download the full covid-19 dataset from ourworldindata every 6 hours. Also shows the download progress bar.
-
-    Args:
-        context (CallbackContext): Required context object by python-telegram-bot.
     """
     if 'last_data_dl_date' not in context.bot_data:
         context.bot_data['last_data_dl_date'] = datetime.today()
@@ -134,13 +131,12 @@ def download_file(context: CallbackContext):
 
     if (today - dl_today).seconds < 21600 and (today - dl_today).days < 1:  # Update if more than 6 hours have passed.
         logging.info("Not time for updates yet.")
-        del today, dl_today
         return
 
     logging.info("Beginning to download...")
 
     r = requests.get("https://covid.ourworldindata.org/data/owid-covid-data.csv", allow_redirects=True, stream=True,
-                     proxies=context.job.context['owid'], timeout=20)
+                     timeout=20)
     block_size = 1024
 
     total_size_in_bytes = (int(r.headers.get('content-length', 0)) / (32 * block_size))

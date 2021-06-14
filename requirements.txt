@@ -1,15 +1,13 @@
 # Python telegram bot-
 python-telegram-bot>=13.1
-python-telegram-bot[socks]
-PySocks
 
 # Graphing/data science library-
-matplotlib~=3.3.0
+matplotlib~=3.3.3
 pandas
 
 # Progress bar for downloads-
-tqdm~=4.48.0
+tqdm~=4.54.0
 
 # Scraping and parsing-
-requests~=2.24.0
-beautifulsoup4~=4.9.1
+requests~=2.25.0
+beautifulsoup4~=4.9.3

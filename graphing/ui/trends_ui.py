@@ -106,9 +106,10 @@ def send_graph(update: Update, context: CallbackContext, x: list, y: list, count
                    f"{(context.bot_data['last_data_dl_date'] - timedelta(hours=4)).strftime('%B %d, %Y at %H:%M:%S')}" \
                    f" UTC_"  # Add date and time of last update
 
-    context.bot.send_photo(chat_id=chat_id,
-                           photo=open(f"graphing/{pic}.png", "rb"), reply_markup=InlineKeyboardMarkup(trend_buttons),
-                           caption=img_caption, parse_mode="MarkdownV2")
+    msg = update.message.reply_photo(photo=open(f"graphing/{pic}.png", "rb"), parse_mode="MarkdownV2",
+                                     reply_markup=InlineKeyboardMarkup(trend_buttons),
+                                     caption=img_caption)
+    context.user_data['graph_id'] = msg.message_id
 
     logging.info(f"\nThe trend picture was just sent to: {update.callback_query.from_user.name}.\n")
 

@@ -6,8 +6,7 @@ from typing import List
 from telegram import Update, InlineKeyboardButton
 from telegram.ext import CallbackContext
 
-from graphing.ui.datas import iso_codes
-from helpers.msg_deletor import del_msg
+from graphing.ui.datas import iso_codes, trend_buttons
 
 
 def trend_to_human_readable(trend: str) -> str:
@@ -29,19 +28,21 @@ def remove_user_data(update: Update, context: CallbackContext) -> None:
         context (CallbackContext): Required context object by python-telegram-bot.
     """
     # Commented out in case we need to delete specific items from user_data only-
-    # for data in {'covid_country', 'covid_trend_pic', 'log', 'trend_data', 'country_list', 'country_page'}:
+    # for data in {'covid_country', 'covid_trend_pic', 'log', 'trend_data', 'country_list', 'country_page', 'graph_id'}:
     #     del context.user_data[data]
     #     logging.info(f"Deleted {data} for {update.effective_user.name}!\n")
-    del_pic(context)
+    del_pic_local(context)
+
+    context.bot.edit_message_reply_markup(chat_id=update.effective_chat.id, message_id=context.user_data['graph_id'],
+                                          reply_markup=None)
+    logging.info(f"The /graphs markup for {update.effective_user.name} has been removed!\n\n")
 
     context.user_data.clear()
+    trend_buttons[0][-1].text = "Log scale ❌"  # Reset to show False if user timed out in log scale True
 
     context.dispatcher.persistence.flush()  # Force save
 
     logging.info(f"All data for {update.effective_user.name} is deleted!\n\n")
-
-    if del_msg(update, context, msg_no=1):
-        logging.info(f"The /graphs msg for {update.effective_user.name} is deleted!\n\n")
 
 
 def remove_all_user_data(context: CallbackContext) -> None:
@@ -52,7 +53,7 @@ def remove_all_user_data(context: CallbackContext) -> None:
         context (CallbackContext): Required context object by python-telegram-bot.
     """
     # print(context.dispatcher.user_data.values())
-    del_pic(context)
+    del_pic_local(context)
 
     for user in context.dispatcher.user_data.values():
         user.clear()
@@ -61,7 +62,7 @@ def remove_all_user_data(context: CallbackContext) -> None:
     logging.info(f"All data for all users is deleted!\n\n")
 
 
-def del_pic(context: CallbackContext) -> None:
+def del_pic_local(context: CallbackContext) -> None:
     """
     Delete the picture which matplotlib stored.
 

@@ -9,7 +9,6 @@ from helpers.db_connector import connection
 from helpers.namer import get_chat_name
 from scrapers.gulfnews import GulfNews
 
-
 text = "This bot can also send you breaking COVID-19 news for the UAE such as new cases, " \
        "deaths, etc. when they come in (usually once a day between 2PM - 8PM UAE time).\n\n" \
        "Do you wish to opt in to receive such news?\n\n" \
@@ -46,11 +45,12 @@ def new_cases_alert(context: CallbackContext) -> None:
     result = connection(query, fetchall=True)
     today = datetime.today()
     alert_today = context.bot_data['sent_alert_today']
+    print(f"Alert hours: {(today - alert_today).seconds}")
 
     for chat_id, chat_name, msg_id in result:
 
         try:
-            if today.month > alert_today.month or today.day > alert_today.day:  # Check if new day has passed
+            if (today - alert_today).seconds >= 12*60:  # Check if new day has passed
                 msg = context.bot.send_message(chat_id=chat_id, text=f"UPDATE: {today.strftime('%d/%m/%Y')}\n\n"
                                                                      f"{breaking_url}")
                 logging.info(f"\nThe breaking news was just sent to: {chat_name}.\n\n")
@@ -71,6 +71,7 @@ def new_cases_alert(context: CallbackContext) -> None:
 
     context.bot_data['latest_breaking_url'] = breaking_url  # Save the latest breaking news url
     context.bot_data['sent_alert_today'] = today
+    logging.info(f"\nSuccessfully updated breaking_url and sent_alert\n\n")
     context.dispatcher.persistence.flush()  # Gotta do this to force save sigh
 
 

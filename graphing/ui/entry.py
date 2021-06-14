@@ -9,14 +9,15 @@ from helpers.namer import get_chat_name
 
 def call_graph_command(update: Update, context: CallbackContext) -> MAIN_SELECTOR:
     """Displays the main selection screen when user first uses /graphs."""
-    context.bot.send_message(chat_id=update.effective_chat.id, text=entry_msg,
-                             reply_markup=InlineKeyboardMarkup(entry_buttons))
+    msg = update.message.reply_text(text=entry_msg, reply_markup=InlineKeyboardMarkup(entry_buttons))
+    context.user_data['graph_id'] = msg.message_id
+
     logging.info(msg=f"\n{update.effective_user.name} is using /graphs in {get_chat_name(update)}")
 
     return MAIN_SELECTOR
 
 
-def show_trend_buttons(update: Update, _: CallbackContext) -> None:
+def show_trend_buttons(update: Update, context: CallbackContext) -> None:
     """Displays the trend buttons and changes the callback data of the back button so back button works as expected."""
     button_clicked = None
 
@@ -36,6 +37,8 @@ def show_trend_buttons(update: Update, _: CallbackContext) -> None:
     logging.info(f"{update.callback_query.from_user.name} has selected {button_clicked}.")
 
     update.callback_query.answer()
-    update.callback_query.edit_message_text(text=updated_selection, parse_mode="MarkdownV2",
-                                            reply_markup=InlineKeyboardMarkup(graph_buttons))
+    msg = update.callback_query.edit_message_text(text=updated_selection, parse_mode="MarkdownV2",
+                                                  reply_markup=InlineKeyboardMarkup(graph_buttons))
+    context.user_data['graph_id'] = msg.message_id
+
     return TREND_SELECTOR

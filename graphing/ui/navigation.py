@@ -1,4 +1,4 @@
-# Navigation for countries and for going back to 'main' screen
+# Navigation for country pages, covid trend selector, and main page.
 
 import logging
 
@@ -11,10 +11,13 @@ from .datas import (entry_msg, entry_buttons, MAIN_SELECTOR, graph_buttons, sele
                     user_selection, iso_codes, COUNTRY_SELECTOR, trend_buttons)
 
 
-def go_back_to_main(update: Update, _: CallbackContext) -> MAIN_SELECTOR:
+def go_back_to_main(update: Update, context: CallbackContext) -> MAIN_SELECTOR:
     """Navigates the user back to the main selector."""
     update.callback_query.answer()
-    update.callback_query.edit_message_text(text=entry_msg, reply_markup=InlineKeyboardMarkup(entry_buttons))
+    msg = update.callback_query.edit_message_text(text=entry_msg, reply_markup=InlineKeyboardMarkup(entry_buttons))
+
+    context.user_data['graph_id'] = msg.message_id
+
     logging.info(msg=f"{update.callback_query.from_user.name} went back to the main menu.")
 
     return MAIN_SELECTOR
@@ -36,8 +39,9 @@ def go_back_to_trend_buttons(update: Update, context: CallbackContext) -> None:
 
     update.callback_query.answer()
     del_msg(update, context)
-    context.bot.send_message(chat_id=update.effective_chat.id, text=msg,
-                             reply_markup=InlineKeyboardMarkup(graph_buttons), parse_mode="MarkdownV2")
+    msg = context.bot.send_message(chat_id=update.effective_chat.id, text=msg,
+                                   reply_markup=InlineKeyboardMarkup(graph_buttons), parse_mode="MarkdownV2")
+    context.user_data['graph_id'] = msg.message_id
 
     context.user_data['log'] = False  # Reset log to False if user left from log=True state.
     trend_buttons[0][-1].text = "Log scale ❌"

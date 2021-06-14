@@ -12,6 +12,4 @@ def del_msg(update: Update, context: CallbackContext, msg_no: int = 0) -> bool:
     except Exception as e:
         logging.info(msg=f"\nMessage couldn't be deleted due to: {e}.")
         return False
-
-    else:
-        return True
+    return True

@@ -70,6 +70,4 @@ iso_codes = {'AFG': 'Afghanistan 🇦🇫', 'ALB': 'Albania 🇦🇱', 'DZA': 'A
              'URY': 'Uruguay 🇺🇾', 'UZB': 'Uzbekistan 🇺🇿', 'VEN': 'Venezuela 🇻🇪', 'VNM': 'Vietnam 🇻🇳',
              'ESH': 'Western Sahara 🇪🇭', 'YEM': 'Yemen 🇾🇪', 'ZMB': 'Zambia 🇿🇲', 'ZWE': 'Zimbabwe 🇿🇼'}
 
-# country_to_iso = {v: k for k, v in iso_codes.items()}
-
 MAIN_SELECTOR, COUNTRY_SELECTOR, TREND_SELECTOR, GRAPH_OPTIONS = range(0, 4)
