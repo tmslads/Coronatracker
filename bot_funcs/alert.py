@@ -48,26 +48,19 @@ def new_cases_alert(context: CallbackContext) -> None:
     print(f"Alert hours: {(today - alert_today).seconds}")
 
     for chat_id, chat_name, msg_id in result:
+        if (today - alert_today).seconds >= 12*60:  # Check if new day has passed
+            msg = context.bot.send_message(chat_id=chat_id, text=f"UPDATE: {today.strftime('%d/%m/%Y')}\n\n"
+                                                                 f"{breaking_url}")
+            logging.info(f"\nThe breaking news was just sent to: {chat_name}.\n\n")
 
-        try:
-            if (today - alert_today).seconds >= 12*60:  # Check if new day has passed
-                msg = context.bot.send_message(chat_id=chat_id, text=f"UPDATE: {today.strftime('%d/%m/%Y')}\n\n"
-                                                                     f"{breaking_url}")
-                logging.info(f"\nThe breaking news was just sent to: {chat_name}.\n\n")
+            msg_query = f"UPDATE CHAT_SETTINGS SET MSG_ID={msg.message_id} WHERE CHAT_ID={chat_id};"
+            connection(msg_query, table_update=True)  # Add/Update message id to db so we can update later
 
-                msg_query = f"UPDATE CHAT_SETTINGS SET MSG_ID={msg.message_id} WHERE CHAT_ID={chat_id};"
-                connection(msg_query, table_update=True)  # Add/Update message id to db so we can update later
-
-            else:
-                context.bot.edit_message_text(chat_id=chat_id, message_id=msg_id,
-                                              text=f"UPDATE: {today.strftime('%d/%m/%Y')}\n\n"
-                                                   f"{breaking_url}")
-                logging.info(f"\nThe breaking news msg was updated for: {chat_name}.\n\n")
-
-        except error.Unauthorized:
-            logging.info(f'\nThe user {chat_name} has blocked the bot, removing from database...\n\n')
-            connection(query=f'DELETE FROM CHAT_SETTINGS WHERE CHAT_ID={chat_id};', table_update=True)
-            logging.info(f'\nThe user was removed from database.')
+        else:
+            context.bot.edit_message_text(chat_id=chat_id, message_id=msg_id,
+                                          text=f"UPDATE: {today.strftime('%d/%m/%Y')}\n\n"
+                                               f"{breaking_url}")
+            logging.info(f"\nThe breaking news msg was updated for: {chat_name}.\n\n")
 
     context.bot_data['latest_breaking_url'] = breaking_url  # Save the latest breaking news url
     context.bot_data['sent_alert_today'] = today

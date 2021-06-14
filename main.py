@@ -5,11 +5,12 @@ import pprint
 
 from telegram import Update
 from telegram.ext import (Updater, CommandHandler, PicklePersistence, CallbackQueryHandler, CallbackContext,
-                          MessageHandler, Filters, ConversationHandler)
+                          MessageHandler, Filters, ConversationHandler, ChatMemberHandler)
 
 import graphing.ui.utility
 from bot_funcs.commands import start, world, uae, helper, ask_feedback, receive_feedback, cancel, vaccine
 from bot_funcs.alert import new_cases_alert, opt_in_out, update_alert
+from bot_funcs.blocked import user_blocked
 from graphing.ui import datas, entry, navigation, country_maker, trends_ui
 from graphing import load_data
 
@@ -129,6 +130,7 @@ dp.add_handler(ConversationHandler(
 
 # Random text to bot-
 dp.add_handler(MessageHandler(filters=Filters.text & Filters.chat_type.private, callback=msgs))
+dp.add_handler(ChatMemberHandler(user_blocked))
 
 updater.job_queue.run_repeating(callback=new_cases_alert, interval=90, first=1)  # Run every 90 seconds
 updater.job_queue.run_repeating(callback=graphing.ui.utility.remove_all_user_data, interval=86400, first=2)
