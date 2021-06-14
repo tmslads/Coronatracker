@@ -45,7 +45,7 @@ def remove_all_user_data(context: CallbackContext) -> None:
     """
     Remove all stored user data.
     """
-    del_pic_local(context)
+    del_pic_local(context, all=True)
 
     for user in context.dispatcher.user_data.values():
         user.clear()
@@ -54,11 +54,16 @@ def remove_all_user_data(context: CallbackContext) -> None:
     logging.info(f"All data for all users is deleted!\n\n")
 
 
-def del_pic_local(context: CallbackContext) -> None:
+def del_pic_local(context: CallbackContext, all: bool = False) -> None:
     """
     Delete the picture which matplotlib stored.
     """
     try:
+        if all:
+            for fname in os.listdir("graphing"):
+                if fname.endswith('.png'):
+                    os.remove(fname)
+            return
         os.remove(path=f"graphing/{context.user_data['covid_trend_pic']}.png")
     except (FileNotFoundError, TypeError, KeyError):
         pass

@@ -52,7 +52,7 @@ def chosen_trend(update: Update, context: CallbackContext) -> GRAPH_OPTIONS:
         context.user_data['trend_data'] = country_data.death_data(_type=user_selection['trend'])
 
     update.callback_query.answer()  # Answer query so user expects something
-    update.message.reply_chat_action('upload_photo')  # Make user wait for a bit
+    update.effective_message.reply_chat_action('upload_photo')  # Make user wait for a bit
 
     # Assign countries(iso code) to user data memory
     if user_selection['country'] == "OWID_WRL":
@@ -105,7 +105,7 @@ def send_graph(update: Update, context: CallbackContext, x: list, y: list, count
                    f"{(context.bot_data['last_data_dl_date'] - timedelta(hours=4)).strftime('%B %d, %Y at %H:%M:%S')}" \
                    f" UTC_"  # Add date and time of last update
 
-    msg = update.message.reply_photo(photo=open(f"graphing/{pic}.png", "rb"), parse_mode="MarkdownV2",
+    msg = update.effective_message.reply_photo(photo=open(f"graphing/{pic}.png", "rb"), parse_mode="MarkdownV2",
                                      reply_markup=InlineKeyboardMarkup(trend_buttons),
                                      caption=img_caption)
     context.user_data['graph_id'] = msg.message_id
