@@ -31,21 +31,19 @@ def helper(update: Update, _: CallbackContext) -> None:
     logging.info(f"\n{update.effective_user.name} just used /help in {get_chat_name(update)}.\n\n")
 
 
-def start(update: Update, context: CallbackContext) -> None:
+def start(update: Update, _: CallbackContext) -> None:
     """Starts the bot for the user for the first time."""
     msg = "This bot gives you information related to the Novel Coronavirus (SARS-CoV-2) and the Coronavirus Disease " \
           "(COVID-19).\n\n Type /help " \
           "to get a detailed list of commands. Some commands available are:\n /graphs, /uae, /world, /alerts."
 
-    context.bot.send_message(chat_id=update.effective_chat.id, text=msg)
+    update.message.reply_text(msg)
     logging.info(f"\n{update.effective_user.name} just used /start in {get_chat_name(update)}.\n\n")
 
 
-def uae(update: Update, context: CallbackContext) -> None:
+def uae(update: Update, _: CallbackContext) -> None:
     """Sends the user detailed coronavirus statistics, for the UAE."""
-    chat_id = update.effective_chat.id
-
-    context.bot.send_chat_action(chat_id=chat_id, action='typing')
+    update.message.reply_chat_action('typing')
     init = WorldMeter()
     new, totals = init.ae_data()
 
@@ -63,7 +61,7 @@ def uae(update: Update, context: CallbackContext) -> None:
           f"people and 1 test done in every {totals[11]} people\.\n\n" \
           f"_Last updated on {datetime.now(timezone.utc).strftime('%B %d, %Y at %H:%M:%S')} UTC_"
 
-    context.bot.send_message(chat_id=chat_id, text=msg, parse_mode="MarkdownV2")
+    update.message.reply_markdown_v2(msg)
     logging.info(f"\n{update.effective_user.name} just used /uae in {get_chat_name(update)}.\n\n")
 
 

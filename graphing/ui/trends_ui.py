@@ -52,7 +52,7 @@ def chosen_trend(update: Update, context: CallbackContext) -> GRAPH_OPTIONS:
         context.user_data['trend_data'] = country_data.death_data(_type=user_selection['trend'])
 
     update.callback_query.answer()  # Answer query so user expects something
-    context.bot.send_chat_action(chat_id=update.effective_chat.id, action='upload_photo')  # Make user wait for a bit
+    update.message.reply_chat_action('upload_photo')  # Make user wait for a bit
 
     # Assign countries(iso code) to user data memory
     if user_selection['country'] == "OWID_WRL":
@@ -82,7 +82,6 @@ def chosen_trend(update: Update, context: CallbackContext) -> GRAPH_OPTIONS:
 def send_graph(update: Update, context: CallbackContext, x: list, y: list, country: str, log: bool = False,
                moving_avg: list = None, is_bar: bool = False, is_pct: bool = False) -> None:
     """Sends graph to the user, with an appropriate caption after passing the parameters to make the graph."""
-    chat_id = update.effective_chat.id
     pic = context.user_data['covid_trend_pic']
 
     make_graph(graph=Plotter(x=x, y=y, logscale=log), country=country,

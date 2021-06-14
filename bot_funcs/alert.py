@@ -68,15 +68,13 @@ def new_cases_alert(context: CallbackContext) -> None:
     context.dispatcher.persistence.flush()  # Gotta do this to force save sigh
 
 
-def opt_in_out(update: Update, context: CallbackContext) -> None:
+def opt_in_out(update: Update, _: CallbackContext) -> None:
     """This function allows the user to opt in or out of receiving breaking coronavirus news."""
 
-    chat_id = update.effective_chat.id
-
-    query = f'SELECT ALERTS FROM CHAT_SETTINGS WHERE CHAT_ID={chat_id};'
+    query = f'SELECT ALERTS FROM CHAT_SETTINGS WHERE CHAT_ID={update.effective_chat.id};'
     status = connection(query, update=update)  # Connect to db to get current settings
 
-    context.bot.send_message(chat_id=chat_id, text=text.replace('()', status), reply_markup=markup)
+    update.message.reply_text(text=text.replace('()', status), reply_markup=markup)
     logging.info(f"\n{update.effective_user.name} just used /alerts in {get_chat_name(update)}.\n\n")
 
 
@@ -84,7 +82,6 @@ def update_alert(update: Update, context: CallbackContext) -> None:
     """This function changes the state of /alerts. The state is saved in a database."""
 
     chat_id = update.effective_chat.id
-    call_id = update.callback_query.id
 
     query = f'SELECT ALERTS FROM CHAT_SETTINGS WHERE CHAT_ID={chat_id};'
     update_query = f"UPDATE CHAT_SETTINGS SET ALERTS='()' WHERE CHAT_ID={chat_id};"
@@ -99,6 +96,6 @@ def update_alert(update: Update, context: CallbackContext) -> None:
     update_text = text.replace('()', f'{new_status}\n\nYour settings were successfully updated.')
 
     update.callback_query.edit_message_text(text=update_text, reply_markup=markup)  # Update message to show change
-    context.bot.answer_callback_query(callback_query_id=call_id)  # Answer the callback query in clients
+    update.callback_query.answer()  # Answer the callback query in clients
     logging.info(f"\n{update.effective_user.name} just toggled /alerts in {get_chat_name(update)} to "
                  f"{new_status}.\n\n")

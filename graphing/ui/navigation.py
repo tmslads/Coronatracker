@@ -39,8 +39,7 @@ def go_back_to_trend_buttons(update: Update, context: CallbackContext) -> None:
 
     update.callback_query.answer()
     del_msg(update, context)
-    msg = context.bot.send_message(chat_id=update.effective_chat.id, text=msg,
-                                   reply_markup=InlineKeyboardMarkup(graph_buttons), parse_mode="MarkdownV2")
+    msg = update.message.reply_markdown_v2(msg, reply_markup=InlineKeyboardMarkup(graph_buttons))
     context.user_data['graph_id'] = msg.message_id
 
     context.user_data['log'] = False  # Reset log to False if user left from log=True state.
