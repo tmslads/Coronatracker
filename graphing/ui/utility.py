@@ -22,10 +22,6 @@ def trend_to_human_readable(trend: str) -> str:
 def remove_user_data(update: Update, context: CallbackContext) -> None:
     """
     Remove stored data for that particular user.
-
-    Args:
-        update (Update): Required update object by python-telegram-bot.
-        context (CallbackContext): Required context object by python-telegram-bot.
     """
     # Commented out in case we need to delete specific items from user_data only-
     # for data in {'covid_country', 'covid_trend_pic', 'log', 'trend_data', 'country_list', 'country_page', 'graph_id'}:
@@ -48,11 +44,7 @@ def remove_user_data(update: Update, context: CallbackContext) -> None:
 def remove_all_user_data(context: CallbackContext) -> None:
     """
     Remove all stored user data.
-
-    Args:
-        context (CallbackContext): Required context object by python-telegram-bot.
     """
-    # print(context.dispatcher.user_data.values())
     del_pic_local(context)
 
     for user in context.dispatcher.user_data.values():
@@ -65,9 +57,6 @@ def remove_all_user_data(context: CallbackContext) -> None:
 def del_pic_local(context: CallbackContext) -> None:
     """
     Delete the picture which matplotlib stored.
-
-    Args:
-        context (CallbackContext): Required context object by python-telegram-bot.
     """
     try:
         os.remove(path=f"graphing/{context.user_data['covid_trend_pic']}.png")
@@ -157,5 +146,3 @@ def remove_emojis(text: str) -> str:
                                  u"\U0001F1E0-\U0001F1FF"  # flags (iOS)
                                  "]+", flags=re.UNICODE)
     return pattern.sub(r'', text)
-
-# verify_country_list()

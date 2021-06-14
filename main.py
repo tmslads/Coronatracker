@@ -2,10 +2,13 @@ import logging
 import os
 import pickle
 import pprint
+import threading
+import time
 
 from telegram import Update
 from telegram.ext import (Updater, CommandHandler, PicklePersistence, CallbackQueryHandler, CallbackContext,
                           MessageHandler, Filters, ConversationHandler, ChatMemberHandler)
+from flask import Flask
 
 import graphing.ui.utility
 from bot_funcs.commands import start, world, uae, helper, ask_feedback, receive_feedback, cancel, vaccine
@@ -13,6 +16,8 @@ from bot_funcs.alert import new_cases_alert, opt_in_out, update_alert
 from bot_funcs.blocked import user_blocked
 from graphing.ui import datas, entry, navigation, country_maker, trends_ui
 from graphing import load_data
+
+app = Flask(__name__)
 
 logging.getLogger('apscheduler').setLevel(logging.WARNING)
 logger = logging.getLogger()
@@ -31,6 +36,14 @@ ch.setFormatter(formatter)
 
 logger.addHandler(fh)
 logger.addHandler(ch)
+
+start_time = time.time()
+
+
+@app.route('/')
+def deploy_info() -> str:
+    return f"I'm https://t.me/uaecoronabot and I'm deployed on repl.it. I've been up for: {time.time() - start_time} " \
+           f"seconds."
 
 
 def data_view() -> None:
@@ -139,5 +152,7 @@ updater.job_queue.run_repeating(callback=load_data.download_file, interval=3600,
 data_view()
 
 updater.start_polling(timeout=15, read_latency=5.0)
+
+threading.Thread(target=lambda: app.run(host='0.0.0.0')).start()  # For deployment on replit
 
 updater.idle()

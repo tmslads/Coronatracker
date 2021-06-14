@@ -11,3 +11,6 @@ tqdm~=4.54.0
 # Scraping and parsing-
 requests~=2.25.0
 beautifulsoup4~=4.9.3
+
+# For deploying on replit indefinitely
+Flask
